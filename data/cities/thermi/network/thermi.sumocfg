@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<configuration>
+    <input>
+        <net-file value="thermi.net.xml"/>
+        <route-files value="thermi.rou.xml"/>
+    </input>
+    <time>
+        <begin value="0"/>
+        <end value="7200"/>
+    </time>
+    <processing>
+        <ignore-route-errors value="true"/>
+    </processing>
+</configuration>

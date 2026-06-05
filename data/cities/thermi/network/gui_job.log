@@ -4,3 +4,81 @@ Using explicit bounding box overrides for: Θέρμη, Δήμος Θέρμης, 
 Downloading OSM XML via Overpass -> data/cities/thermi/network/location.osm
 Saved 0.9 MB -> data/cities/thermi/network/location.osm
 Attribution: OpenStreetMap contributors (ODbL)
+================================================================
+  City Generator: thermi
+  Source OSM : /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/location.osm
+  Output dir : /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network
+  Demand     : random
+  Period     : 0.1s
+================================================================
+[ 1/4 ]  Preparing city OSM input ...
+    OSM copied -> /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/thermi.osm
+[ 2/4 ]  Building SUMO network ...
+  $ netconvert --osm-files /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/thermi.osm --type-files /L...
+    Network compiled -> /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/thermi.net.xml (5.0 MB)
+[ 3/4 ]  Generating randomTrips routes (period=0.1s) ...
+  $ /opt/anaconda3/envs/vEnvAC/bin/python3.14 /Library/Frameworks/EclipseSUMO.framework/Versions/1.26.0/EclipseSUMO/share/sumo/tools/rand...
+    Routes generated -> /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/thermi.rou.xml (72,000 trips)
+[ 4/4 ]  Writing run configuration ...
+    wrote /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/thermi.sumocfg
+  Config updated:
+    sumo.config_file = /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/thermi.sumocfg
+    sumo.binary      = sumo
+================================================================
+  City assets ready for thermi
+  SUMO cfg: /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/thermi.sumocfg
+  Run with:
+    sumo -c /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/thermi.sumocfg
+================================================================
+================================================================
+  City Generator: thermi
+  Source OSM : /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/thermi.osm
+  Output dir : /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network
+  Demand     : random
+  Period     : 0.5s
+================================================================
+[ 1/4 ]  Preparing city OSM input ...
+    OSM already in place -> /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/thermi.osm
+[ 2/4 ]  Building SUMO network ...
+  $ netconvert --osm-files /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/thermi.osm --type-files /L...
+    Network compiled -> /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/thermi.net.xml (5.0 MB)
+[ 3/4 ]  Generating randomTrips routes (period=0.5s) ...
+  $ /opt/anaconda3/envs/vEnvAC/bin/python3.14 /Library/Frameworks/EclipseSUMO.framework/Versions/1.26.0/EclipseSUMO/share/sumo/tools/rand...
+    Routes generated -> /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/thermi.rou.xml (14,400 trips)
+[ 4/4 ]  Writing run configuration ...
+    wrote /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/thermi.sumocfg
+  Config updated:
+    sumo.config_file = /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/thermi.sumocfg
+    sumo.binary      = sumo
+================================================================
+  City assets ready for thermi
+  SUMO cfg: /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/thermi.sumocfg
+  Run with:
+    sumo -c /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/thermi.sumocfg
+================================================================
+================================================================
+  City Generator: thermi
+  Source OSM : /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/thermi.osm
+  Output dir : /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network
+  Demand     : random
+  Period     : 0.2s
+================================================================
+[ 1/4 ]  Preparing city OSM input ...
+    OSM already in place -> /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/thermi.osm
+[ 2/4 ]  Building SUMO network ...
+  $ netconvert --osm-files /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/thermi.osm --type-files /L...
+    Network compiled -> /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/thermi.net.xml (5.0 MB)
+[ 3/4 ]  Generating randomTrips routes (period=0.2s) ...
+  $ /opt/anaconda3/envs/vEnvAC/bin/python3.14 /Library/Frameworks/EclipseSUMO.framework/Versions/1.26.0/EclipseSUMO/share/sumo/tools/rand...
+    Routes generated -> /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/thermi.rou.xml (36,001 trips)
+[ 4/4 ]  Writing run configuration ...
+    wrote /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/thermi.sumocfg
+  Config updated:
+    sumo.config_file = /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/thermi.sumocfg
+    sumo.binary      = sumo
+================================================================
+  City assets ready for thermi
+  SUMO cfg: /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/thermi.sumocfg
+  Run with:
+    sumo -c /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/thermi.sumocfg
+================================================================
