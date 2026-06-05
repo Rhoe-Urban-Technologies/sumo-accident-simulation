@@ -1,0 +1,103 @@
+sumo:
+  config_file: /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thermi/network/thermi.sumocfg
+  binary: sumo
+  total_steps: 7200
+  seed: 1
+  step_length: 1
+risk:
+  base_probability: 3.0e-06
+  speed_weight: 0.4
+  speed_exponent: 2
+  speed_variance_weight: 0.3
+  speed_variance_threshold_ms: 5
+  density_weight: 0.3
+  peak_density_vehicles_per_km: 15
+  road_type_multipliers:
+    highway: 1.5
+    arterial: 1
+    local: 0.6
+    intersection: 2
+  trigger_threshold: 0.35
+  neighbor_radius_m: 150
+accident:
+  max_concurrent_accidents: 4
+  secondary_accident_enabled: true
+  incident_effect_mode: hybrid
+  reroute_affected_vehicles: true
+  reroute_radius_m: 750
+  reroute_interval_s: 60
+  severity:
+    minor:
+      weight: 62
+      duration_min_s: 120
+      duration_max_s: 900
+      lane_capacity_fraction: 0.7
+      response_time_s: 300
+      secondary_risk_radius_m: 75
+      secondary_risk_multiplier: 1.5
+    moderate:
+      weight: 28
+      duration_min_s: 900
+      duration_max_s: 2700
+      lane_capacity_fraction: 0.4
+      response_time_s: 600
+      secondary_risk_radius_m: 150
+      secondary_risk_multiplier: 2.5
+    major:
+      weight: 8
+      duration_min_s: 2700
+      duration_max_s: 7200
+      lane_capacity_fraction: 0.1
+      response_time_s: 1200
+      secondary_risk_radius_m: 300
+      secondary_risk_multiplier: 4
+    critical:
+      weight: 2
+      duration_min_s: 3600
+      duration_max_s: 18000
+      lane_capacity_fraction: 0
+      response_time_s: 1800
+      secondary_risk_radius_m: 500
+      secondary_risk_multiplier: 6
+output:
+  output_folder: results/custom/new_config
+  metrics_interval_steps: 120
+  save_vehicle_snapshots: true
+  save_accident_reports: true
+  compute_antifragility_index: true
+  save_accident_heatmap: true
+  live_progress: false
+  live_progress_refresh_steps: 360
+  pre_window_seconds: 360
+  post_window_seconds: 360
+  baseline_window_steps: 3600
+resilience_assessment:
+  max_workers: null
+  base_port: 10000
+  demand_levels:
+  - 0.5
+  - 0.75
+  - 1
+  - 1.5
+  - 2
+  - 3
+  - 5
+  seeds_per_scenario: 3
+  base_seed: 42
+  incident_configs:
+  - name: baseline
+    base_probability: 0
+  - name: low_incident
+    base_probability: 1.0e-05
+  - name: default_incident
+    base_probability: 3.0e-05
+  - name: high_incident
+    base_probability: 0.0001
+  - name: extreme_incident
+    base_probability: 0.0002
+  resilience_weights:
+    speed: 0.3
+    throughput: 0.25
+    recovery: 0.25
+    robustness: 0.2
+  top_weak_points: 10

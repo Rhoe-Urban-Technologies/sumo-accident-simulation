@@ -32,6 +32,7 @@ The v0.3 documents distinguish three levels of material:
 | `docs/antifragicity/AntifragiCity_Documentation_Index.md` | Navigation entry point for the AntifragiCity/SUMA documentation set. |
 | `docs/antifragicity/SUMA_Codex_Development_Instructions_v0.3.md` | Master internal development context for D5.1/T5.2 and Codex work. |
 | `docs/antifragicity/Rhoe_MiniGA_Thessaloniki_Working_Guide_v0.3.md` | Internal Rhoe guide for Mini-GA facilitation and October roadmap. |
+| `docs/antifragicity/SUMA_MiniGA_Day2_Brief_Visual_Outline.md` | Two-slide Day 2 visual outline for SUMA architecture and D5.1 structure. |
 | `docs/antifragicity/SUMA_Objects_API_Schemas_v0.3.md` | Technical object, API, schema, validation, and staging catalogue. |
 
 ## Current Internal Working Set
