@@ -1,0 +1,33 @@
+City scaffold ready: data/cities/thessaloniki_centre and configs/thessaloniki_centre/default.yaml
+Using explicit bounding box overrides for: Thessaloniki Centre
+  Matched: Thessaloniki Centre
+  Bounding box: south=40.614390, west=22.914827, north=40.649565, east=22.969050
+Downloading OSM XML via Overpass -> data/cities/thessaloniki_centre/network/thessaloniki_centre.osm
+Saved 2.6 MB -> data/cities/thessaloniki_centre/network/thessaloniki_centre.osm
+Attribution: OpenStreetMap contributors (ODbL)
+================================================================
+  City Generator: thessaloniki_centre
+  Source OSM : /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thessaloniki_centre/network/thessaloniki_centre.osm
+  Output dir : /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thessaloniki_centre/network
+  Demand     : random
+  Period     : 1.0s
+================================================================
+[ 1/4 ]  Preparing city OSM input ...
+    OSM already in place -> /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thessaloniki_centre/network/thessaloniki_centre.osm
+[ 2/4 ]  Building SUMO network ...
+  $ netconvert --osm-files /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thessaloniki_centre/network/thessaloniki_...
+    Network compiled -> /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thessaloniki_centre/network/thessaloniki_centre.net.xml (13.5 MB)
+[ 3/4 ]  Generating randomTrips routes (period=1.0s) ...
+  $ /opt/anaconda3/envs/vEnvAC/bin/python3.14 /Library/Frameworks/EclipseSUMO.framework/Versions/1.26.0/EclipseSUMO/share/sumo/tools/rand...
+    Routes generated -> /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thessaloniki_centre/network/thessaloniki_centre.rou.xml (7,200 trips)
+[ 4/4 ]  Writing run configuration ...
+    wrote /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thessaloniki_centre/network/thessaloniki_centre.sumocfg
+  Config updated:
+    sumo.config_file = /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thessaloniki_centre/network/thessaloniki_centre.sumocfg
+    sumo.binary      = sumo
+================================================================
+  City assets ready for thessaloniki_centre
+  SUMO cfg: /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thessaloniki_centre/network/thessaloniki_centre.sumocfg
+  Run with:
+    sumo -c /Users/kgrizos/Documents/GitHub/sumo-accident-simulation/data/cities/thessaloniki_centre/network/thessaloniki_centre.sumocfg
+================================================================
