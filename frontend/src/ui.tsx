@@ -2,18 +2,23 @@ import type { ReactNode } from "react";
 
 export type IconName =
   | "analysis"
+  | "baseline"
   | "close"
   | "config"
   | "data"
   | "docs"
+  | "equilibrium"
   | "generators"
   | "info"
   | "jobs"
+  | "kpis"
   | "menu"
+  | "notification"
   | "overview"
   | "results"
   | "search"
-  | "simulations";
+  | "simulations"
+  | "social_media";
 
 const ICON_PATHS: Record<IconName, string> = {
   overview: "M4 13.5h7.5V4H4v9.5Zm0 6.5h7.5v-4H4v4Zm10 0h6v-9h-6v9Zm0-11.5h6V4h-6v4.5Z",
@@ -29,6 +34,11 @@ const ICON_PATHS: Record<IconName, string> = {
   menu: "M4 6h16v2H4V6Zm0 5h16v2H4v-2Zm0 5h16v2H4v-2Z",
   info: "M12 2.75a9.25 9.25 0 1 1 0 18.5 9.25 9.25 0 0 1 0-18.5Zm-1 7.5V17h2v-6.75h-2ZM11 7v2h2V7h-2Z",
   search: "M10.5 4a6.5 6.5 0 0 1 5.1 10.54l4.18 4.18-1.42 1.42-4.18-4.18A6.5 6.5 0 1 1 10.5 4Zm0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9Z",
+  social_media: "M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92Z",
+  kpis: "M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2Zm0 2a8 8 0 0 1 8 8 8 8 0 0 1-8 8A8 8 0 0 1 4 12 8 8 0 0 1 12 4Zm-.5 2v6.25l5.25 3.15.75-1.23-4.5-2.67V6h-1.5Z",
+  baseline: "M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6Zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2Zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2Z",
+  equilibrium: "M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2Zm0 15-5-2.18L7 18V5h10v13Z",
+  notification: "M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2Zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2Z",
 };
 
 export function Icon({ name }: { name: IconName }) {

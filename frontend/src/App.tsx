@@ -29,14 +29,19 @@ import type {
 } from "./types";
 
 type ViewKey =
-  | "overview"
+  | "stakeholder_dashboard"
+  | "social_media"
+  | "view_kpis"
+  | "view_baseline_scenarios"
+  | "view_live_simulations"
+  | "view_past_simulations"
+  | "baseline_scenario_creation"
+  | "simulation_creation"
+  | "view_edit_data"
+  | "equilibrium_model"
   | "configs"
-  | "data_integrations"
   | "generators"
-  | "simulations"
   | "analysis"
-  | "jobs"
-  | "results"
   | "documentation";
 type ConfigMode = "structured" | "raw";
 type ConfigSectionKey = ConfigSectionSpec["key"];
@@ -81,21 +86,26 @@ const DEFAULT_BRANDING: Branding = {
 };
 
 const VIEW_LABELS: Array<{ key: ViewKey; label: string; icon: IconName }> = [
-  { key: "overview", label: "Overview", icon: "overview" },
-  { key: "documentation", label: "Documentation", icon: "docs" },
-  { key: "configs", label: "Config Studio", icon: "config" },
-  { key: "data_integrations", label: "Data & Integrations", icon: "data" },
+  { key: "stakeholder_dashboard", label: "Stakeholder Dashboard", icon: "overview" },
+  { key: "social_media", label: "Social Media Dashboard", icon: "social_media" },
+  { key: "view_kpis", label: "View KPIs", icon: "kpis" },
+  { key: "view_baseline_scenarios", label: "View Baseline Scenarios", icon: "baseline" },
+  { key: "view_live_simulations", label: "View Live Simulations", icon: "simulations" },
+  { key: "view_past_simulations", label: "View Past Simulations", icon: "results" },
+  { key: "baseline_scenario_creation", label: "Baseline Scenario Creation", icon: "baseline" },
+  { key: "simulation_creation", label: "Simulation Creation", icon: "config" },
+  { key: "view_edit_data", label: "View / Edit Data", icon: "data" },
+  { key: "equilibrium_model", label: "Equilibrium Model", icon: "equilibrium" },
   { key: "generators", label: "OD Generators", icon: "generators" },
-  { key: "simulations", label: "Simulations", icon: "simulations" },
   { key: "analysis", label: "Analysis", icon: "analysis" },
-  { key: "results", label: "Results", icon: "results" },
-  { key: "jobs", label: "Jobs", icon: "jobs" },
+  { key: "configs", label: "Config Studio", icon: "config" },
+  { key: "documentation", label: "Documentation", icon: "docs" },
 ];
 
-const WORKFLOW_CATEGORY_BY_VIEW: Record<Exclude<ViewKey, "overview" | "configs" | "jobs" | "results" | "documentation">, string> = {
-  data_integrations: "Data & Integrations",
+const WORKFLOW_CATEGORY_BY_VIEW: Record<string, string> = {
+  view_edit_data: "Data & Integrations",
   generators: "Generators",
-  simulations: "Simulations",
+  simulation_creation: "Simulations",
   analysis: "Analysis",
 };
 
@@ -937,9 +947,136 @@ function WorkflowCard({
   );
 }
 
+// ── Equilibrium Model helpers ────────────────────────────────────────────────
+
+function eqmCompute(kpis: Record<string, number>, useFull: boolean): number {
+  const { M = 0, R = 0, C = 0, S = 0, Q = 0, I = 0 } = kpis;
+  if (useFull) return Math.max(0, Math.min(1, (M + R + C + I - S - Q + 2) / 6));
+  return Math.max(0, Math.min(1, (M + R + C - S + 1) / 4));
+}
+
+function eqmInterpret(E: number): { label: string; cls: string } {
+  if (E >= 0.75) return { label: "Excellent", cls: "eqm-excellent" };
+  if (E >= 0.60) return { label: "Good", cls: "eqm-good" };
+  if (E >= 0.45) return { label: "Moderate", cls: "eqm-moderate" };
+  if (E >= 0.30) return { label: "Poor", cls: "eqm-poor" };
+  return { label: "Critical", cls: "eqm-critical" };
+}
+
+function eqmVulnLabel(dE: number): string {
+  if (dE <= -0.05) return "Antifragile — post-event performance exceeded baseline";
+  if (dE < 0.10) return "Resilient — negligible performance loss";
+  if (dE < 0.30) return "Moderate vulnerability — noticeable performance degradation";
+  return "Major vulnerability — significant system disruption";
+}
+
+function EqmKpiSlider({
+  label, desc, value, onChange, higherIsBetter, estimated, estimatedNote, compact = false,
+}: {
+  label: string;
+  desc?: string;
+  value: number;
+  onChange: (v: number) => void;
+  higherIsBetter: boolean;
+  estimated?: boolean;
+  estimatedNote?: string;
+  compact?: boolean;
+}) {
+  return (
+    <div className={`eqm-kpi-slider ${compact ? "is-compact" : ""}`}>
+      <div className="eqm-slider-header">
+        <span className="eqm-slider-label">{label}</span>
+        <div className="eqm-slider-value-row">
+          <input
+            type="number"
+            className="eqm-slider-number"
+            min={0} max={1} step={0.01}
+            value={value}
+            onChange={(e) => {
+              const v = Math.max(0, Math.min(1, Number(e.target.value)));
+              if (Number.isFinite(v)) onChange(v);
+            }}
+          />
+          <span className={`eqm-direction ${higherIsBetter ? "prefer-high" : "prefer-low"}`}>
+            {higherIsBetter ? "↑ higher" : "↓ lower"}
+          </span>
+        </div>
+      </div>
+      {desc && !compact ? <p className="eqm-slider-desc">{desc}</p> : null}
+      <input
+        type="range"
+        min={0} max={1} step={0.01}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="eqm-range"
+      />
+      {estimated ? (
+        <small className="eqm-estimated-tag">
+          {estimatedNote ?? "Estimated from simulation data — review before running."}
+        </small>
+      ) : null}
+    </div>
+  );
+}
+
+// ── End Equilibrium Model helpers ────────────────────────────────────────────
+
 export default function App() {
   const [branding, setBranding] = useState<Branding>(DEFAULT_BRANDING);
-  const [view, setView] = useState<ViewKey>("overview");
+  const [view, setView] = useState<ViewKey>("stakeholder_dashboard");
+  // ── Scenario Builder (shared by simulation_creation and baseline_scenario_creation) ──
+  const [scnStep, setScnStep] = useState<"geospatial" | "disruption" | "road" | "launch">("geospatial");
+  type ScnInputMode = "manual" | "ontology";
+  const [scnGeoRoadsMode, setScnGeoRoadsMode] = useState<ScnInputMode>("manual");
+  const [scnGeoRoads, setScnGeoRoads] = useState<string>("");
+  const [scnGeoRiversMode, setScnGeoRiversMode] = useState<ScnInputMode>("manual");
+  const [scnGeoRivers, setScnGeoRivers] = useState<string>("");
+  const [scnGeoLakesMode, setScnGeoLakesMode] = useState<ScnInputMode>("manual");
+  const [scnGeoLakes, setScnGeoLakes] = useState<string>("");
+  type DisruptionType =
+    | "base" | "flood" | "flash_flood" | "snowfall" | "earthquake"
+    | "heatwave" | "road_close" | "evacuation" | "congestion" | "exogenous";
+  const [scnDisruptionType, setScnDisruptionType] = useState<DisruptionType>("flood");
+  const [scnDisruptionSeverity, setScnDisruptionSeverity] = useState<string>("moderate");
+  const [scnDisruptionPeriod, setScnDisruptionPeriod] = useState<string>("");
+  const [scnDisruptionParams, setScnDisruptionParams] = useState<Record<string, { value: string; mode: ScnInputMode }>>({});
+  type ScnTriageMode = "select_base_city" | "manual_input";
+  const [scnTriageMode, setScnTriageMode] = useState<ScnTriageMode>("select_base_city");
+  const [scnTriageCity, setScnTriageCity] = useState<string>("");
+  const [scnTriageScenario, setScnTriageScenario] = useState<string>("");
+  const [scnTriageManual, setScnTriageManual] = useState<Record<string, string>>({});
+  const [scnOdsMode, setScnOdsMode] = useState<ScnInputMode>("manual");
+  const [scnOds, setScnOds] = useState<string>("");
+  const [scnBuilderTab, setScnBuilderTab] = useState<"builder" | "run">("builder");
+  const [scnGeoTab, setScnGeoTab] = useState<"select" | "extract">("select");
+  // ── Notifications ──────────────────────────────────────────────────────────
+  const [notificationsOpen, setNotificationsOpen] = useState<boolean>(false);
+  const [notifications, setNotifications] = useState<Array<{ id: string; title: string; body: string; read: boolean }>>([]);
+  // ── EQM state ──────────────────────────────────────────────────────────────
+  const [eqmInputMode, setEqmInputMode] = useState<"simulation" | "manual" | "ontology">("simulation");
+  const [eqmSimRunRoot, setEqmSimRunRoot] = useState<string>("");
+  const [eqmKpis, setEqmKpis] = useState<Record<string, number>>({ M: 0.80, R: 0.60, C: 0.70, S: 0.30, Q: 0.25, I: 0.65 });
+  const [eqmUseFull, setEqmUseFull] = useState<boolean>(false);
+  const [eqmResults, setEqmResults] = useState<{
+    E: number; kpisSnapshot: Record<string, number>; usedFull: boolean; E_base: number | null; dE: number | null;
+  } | null>(null);
+  const [eqmCompare, setEqmCompare] = useState<boolean>(false);
+  const [eqmBaselineInputMode, setEqmBaselineInputMode] = useState<"simulation" | "manual">("manual");
+  const [eqmBaselineRunRoot, setEqmBaselineRunRoot] = useState<string>("");
+  const [eqmBaselineKpis, setEqmBaselineKpis] = useState<Record<string, number>>({ M: 0.82, R: 0.70, C: 0.75, S: 0.20, Q: 0.20, I: 0.70 });
+  // ── View / Edit Data state ─────────────────────────────────────────────────
+  const [vedTab, setVedTab] = useState<"management" | "pipeline">("management");
+  const [vedSource, setVedSource] = useState<"simulation" | "ontology" | "functional">("simulation");
+  const [vedRunFilter, setVedRunFilter] = useState<string>("");
+  const [vedSelectedRunRoot, setVedSelectedRunRoot] = useState<string>("");
+  const [vedSelectedSummary, setVedSelectedSummary] = useState<ResultRunSummary | null>(null);
+  const [vedSummaryLoading, setVedSummaryLoading] = useState<boolean>(false);
+  const [vedEditName, setVedEditName] = useState<string>("");
+  const [vedEditNotes, setVedEditNotes] = useState<string>("");
+  const [vedEditTags, setVedEditTags] = useState<string>("");
+  const [vedMarkBaseline, setVedMarkBaseline] = useState<boolean>(false);
+  const [vedShowKpiEdit, setVedShowKpiEdit] = useState<boolean>(false);
+  const [vedKpiOverride, setVedKpiOverride] = useState<Record<string, number>>({ M: 0.80, R: 0.60, C: 0.70, S: 0.30 });
   const [workflowSpecs, setWorkflowSpecs] = useState<WorkflowSpec[]>([]);
   const [workflowValues, setWorkflowValues] = useState<Record<string, Record<string, unknown>>>({});
   const [configPaths, setConfigPaths] = useState<string[]>([]);
@@ -1792,6 +1929,36 @@ export default function App() {
       .catch(() => setSelectedTrafficFeedFileText("Unable to load feed file preview."));
   }, [selectedTrafficFeedFile]);
 
+  useEffect(() => {
+    if (!eqmSimRunRoot) return;
+    void api.get<ResultRunSummary>(`/api/results/summary?path=${encodeURIComponent(eqmSimRunRoot)}`)
+      .then((data) => {
+        const stats = (data.metrics?.stats ?? {}) as Record<string, number>;
+        const speedRatio = stats["mean_speed_ratio"] ?? stats["speed_ratio"] ?? null;
+        setEqmKpis((prev) => ({
+          ...prev,
+          M: speedRatio !== null ? Math.min(1, Math.max(0, speedRatio)) : prev.M,
+          S: speedRatio !== null ? Math.min(1, Math.max(0, 1 - speedRatio * 0.7)) : prev.S,
+        }));
+      })
+      .catch(() => {});
+  }, [eqmSimRunRoot]);
+
+  useEffect(() => {
+    if (!eqmBaselineRunRoot || eqmBaselineInputMode !== "simulation") return;
+    void api.get<ResultRunSummary>(`/api/results/summary?path=${encodeURIComponent(eqmBaselineRunRoot)}`)
+      .then((data) => {
+        const stats = (data.metrics?.stats ?? {}) as Record<string, number>;
+        const speedRatio = stats["mean_speed_ratio"] ?? stats["speed_ratio"] ?? null;
+        setEqmBaselineKpis((prev) => ({
+          ...prev,
+          M: speedRatio !== null ? Math.min(1, Math.max(0, speedRatio)) : prev.M,
+          S: speedRatio !== null ? Math.min(1, Math.max(0, 1 - speedRatio * 0.7)) : prev.S,
+        }));
+      })
+      .catch(() => {});
+  }, [eqmBaselineRunRoot, eqmBaselineInputMode]);
+
   const updateWorkflowValue = (workflowId: string, name: string, value: unknown) => {
     setWorkflowValues((current) => ({
       ...current,
@@ -1800,6 +1967,46 @@ export default function App() {
         [name]: value,
       },
     }));
+  };
+
+  useEffect(() => {
+    if (!vedSelectedRunRoot) { setVedSelectedSummary(null); return; }
+    setVedSummaryLoading(true);
+    void api.get<ResultRunSummary>(`/api/results/summary?path=${encodeURIComponent(vedSelectedRunRoot)}`)
+      .then((data) => {
+        setVedSelectedSummary(data);
+        const runName = String((data.metadata?.["run_name"] ?? data.metadata?.["name"] ?? "") || (vedSelectedRunRoot.split("/").pop() ?? ""));
+        setVedEditName(runName);
+        setVedMarkBaseline(!data.accidents || data.accidents.count === 0);
+        const stats = (data.metrics?.stats ?? {}) as Record<string, number>;
+        const speedRatio = stats["mean_speed_ratio"] ?? stats["speed_ratio"] ?? null;
+        if (speedRatio !== null) {
+          setVedKpiOverride((p) => ({
+            ...p,
+            M: Math.min(1, Math.max(0, speedRatio)),
+            S: Math.min(1, Math.max(0, 1 - speedRatio * 0.7)),
+          }));
+        }
+      })
+      .catch(() => setVedSelectedSummary(null))
+      .finally(() => setVedSummaryLoading(false));
+  }, [vedSelectedRunRoot]);
+
+  const runEqm = () => {
+    const E = eqmCompute(eqmKpis, eqmUseFull);
+    let E_base: number | null = null;
+    let dE: number | null = null;
+    if (eqmCompare) {
+      E_base = eqmCompute(eqmBaselineKpis, eqmUseFull);
+      dE = E_base > 0 ? 1 - E / E_base : 0;
+    }
+    setEqmResults({ E, kpisSnapshot: { ...eqmKpis }, usedFull: eqmUseFull, E_base, dE });
+    setNotifications((prev) => [{
+      id: `eqm-${Date.now()}`,
+      title: "EQM Run Complete",
+      body: `Performance Index E = ${E.toFixed(3)} (${eqmInterpret(E).label})`,
+      read: false,
+    }, ...prev]);
   };
 
   const launchWorkflow = async (workflowId: string) => {
@@ -1814,7 +2021,8 @@ export default function App() {
       });
       setSelectedJobId(result.id);
       setMessage(`Started ${workflow.title}`);
-      setView("jobs");
+      setNotifications((prev) => [{ id: result.id, title: "Job Started", body: workflow.title, read: false }, ...prev]);
+      setView("view_live_simulations");
     } catch (error) {
       setMessage(`Failed to start job: ${String(error)}`);
     }
@@ -2414,6 +2622,570 @@ export default function App() {
       ))}
     </div>
   );
+
+  // ── Scenario builder constants ────────────────────────────────────────────
+  const DISRUPTION_TYPES: Record<string, { label: string; params: string[] }> = {
+    base:        { label: "Base (No Disruption)", params: [] },
+    flood:       { label: "Flood", params: ["rain_mm", "raster_file", "coord_sys", "retrn_period"] },
+    flash_flood: { label: "Flash Flood", params: ["rain_mm", "raster_file", "coord_sys", "retrn_period"] },
+    snowfall:    { label: "Snowfall", params: ["mm_day_rain", "temp", "temp_threshold", "raster_file"] },
+    earthquake:  { label: "Earthquake", params: ["aff_roads"] },
+    heatwave:    { label: "Heatwave", params: ["temp", "pct_cong_up"] },
+    road_close:  { label: "Road Closure", params: ["aff_roads"] },
+    evacuation:  { label: "Evacuation", params: ["poi"] },
+    congestion:  { label: "Congestion", params: ["pct_cong"] },
+    exogenous:   { label: "Exogenous", params: ["pct_variables_affected"] },
+  };
+
+  const PARAM_META: Record<string, { label: string; placeholder: string; unit?: string }> = {
+    aoe_roads:             { label: "Roads (AoE)", placeholder: "road IDs or shapefile path" },
+    aoe_rivers:            { label: "Rivers (AoE)", placeholder: "river IDs or shapefile path" },
+    aoe_lakes:             { label: "Lakes (AoE)", placeholder: "lake IDs or shapefile path" },
+    ods:                   { label: "Origin-Destination Matrix", placeholder: "/path/to/od_matrix.csv" },
+    rain_mm:               { label: "Rainfall", placeholder: "e.g. 50", unit: "mm" },
+    raster_file:           { label: "Raster File Path", placeholder: "/path/to/flood.tif" },
+    coord_sys:             { label: "Coordinate System", placeholder: "e.g. EPSG:4326" },
+    retrn_period:          { label: "Return Period", placeholder: "e.g. 100", unit: "yr" },
+    mm_day_rain:           { label: "Rainfall", placeholder: "e.g. 30", unit: "mm/day" },
+    temp:                  { label: "Temperature", placeholder: "e.g. -5", unit: "°C" },
+    temp_threshold:        { label: "Temp. Threshold", placeholder: "e.g. -3", unit: "°C" },
+    aff_roads:             { label: "Affected Roads", placeholder: "road IDs, comma-separated" },
+    pct_cong_up:           { label: "Congestion Increase", placeholder: "e.g. 0.25", unit: "%" },
+    poi:                   { label: "Point of Interest", placeholder: "POI name or coordinates" },
+    pct_cong:              { label: "Congestion Level", placeholder: "e.g. 0.5", unit: "%" },
+    pct_variables_affected:{ label: "Variables Affected", placeholder: "e.g. 0.3", unit: "%" },
+  };
+
+  const TRIAGE_MANUAL_FIELDS = [
+    { key: "choose_critical_infr",  label: "Critical Infrastructure", placeholder: "road IDs or area name" },
+    { key: "choose_prio_grps",      label: "Priority Groups", placeholder: "group labels" },
+    { key: "choose_poi",            label: "Points of Interest", placeholder: "POI names" },
+    { key: "choose_patient_dens",   label: "Patient Density Areas", placeholder: "zone IDs" },
+    { key: "choose_areas_of_origin",label: "Areas of Origin", placeholder: "zone IDs" },
+    { key: "choose_cong_area",      label: "Congestion Area", placeholder: "area / road ID" },
+    { key: "extra_cong",            label: "Extra Congestion", placeholder: "e.g. 0.2", },
+    { key: "choose_shuttle",        label: "Shuttle Routes", placeholder: "route IDs" },
+    { key: "choose_transfer",       label: "Transfer Points", placeholder: "junction IDs" },
+  ];
+
+  // shared helper: ontology-vs-manual toggle row + input
+  const ScnFieldRow = ({
+    paramKey, mode, value,
+    onModeChange, onValueChange,
+  }: {
+    paramKey: string;
+    mode: "manual" | "ontology";
+    value: string;
+    onModeChange: (m: "manual" | "ontology") => void;
+    onValueChange: (v: string) => void;
+  }) => {
+    const meta = PARAM_META[paramKey] ?? { label: paramKey, placeholder: "" };
+    return (
+      <div className="scn-field-row">
+        <div className="scn-field-header">
+          <span className="scn-field-label">{meta.label}{meta.unit ? <span className="scn-field-unit"> ({meta.unit})</span> : null}</span>
+          <div className="scn-input-toggle">
+            <button
+              className={`scn-toggle-btn ${mode === "manual" ? "is-active" : ""}`}
+              onClick={() => onModeChange("manual")}
+            >Manual Input</button>
+            <button
+              className={`scn-toggle-btn ontology ${mode === "ontology" ? "is-active" : ""}`}
+              disabled
+              title="Ontology DB connector not yet implemented"
+              onClick={() => onModeChange("ontology")}
+            >Ontology DB</button>
+          </div>
+        </div>
+        {mode === "manual" ? (
+          <input
+            type="text"
+            className="text-input"
+            placeholder={meta.placeholder}
+            value={value}
+            onChange={(e) => onValueChange(e.target.value)}
+          />
+        ) : (
+          <div className="scn-ontology-placeholder">
+            <span className="muted">Ontology DB connector — planned (D3.4)</span>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const getScnParam = (key: string) => scnDisruptionParams[key] ?? { value: "", mode: "manual" as const };
+  const setScnParam = (key: string, patch: Partial<{ value: string; mode: "manual" | "ontology" }>) =>
+    setScnDisruptionParams((prev) => ({ ...prev, [key]: { ...getScnParam(key), ...patch } }));
+
+  const renderScnBuilder = (isBaseline: boolean) => {
+    const steps = isBaseline
+      ? (["geospatial", "road", "launch"] as const)
+      : (["geospatial", "disruption", "road", "launch"] as const);
+    const stepLabels: Record<string, string> = {
+      geospatial: "Geospatial AoE",
+      disruption:  "Disruption",
+      road:        "Road ODs",
+      launch:      "Launch",
+    };
+
+    return (
+      <div className="scn-builder">
+        {/* Step progress bar */}
+        <nav className="scn-steps" aria-label="Scenario creation steps">
+          {steps.map((s, i) => (
+            <button
+              key={s}
+              className={`scn-step ${scnStep === s ? "is-active" : ""} ${(steps as ReadonlyArray<string>).indexOf(scnStep) > i ? "is-done" : ""}`}
+              onClick={() => setScnStep(s)}
+            >
+              <span className="scn-step-num">{i + 1}</span>
+              <span className="scn-step-label">{stepLabels[s]}</span>
+            </button>
+          ))}
+        </nav>
+
+        {/* ── Step 1: Geospatial AoE ── */}
+        {scnStep === "geospatial" ? (
+          <div className="scn-step-content">
+            <div className="scn-step-title">
+              <h3>Geospatial Area of Effect</h3>
+              <p className="muted">
+                Select an already-extracted city network as the spatial basis for this scenario, or use the OSM extraction tool to download a new one.
+                Road networks, river bodies, and lake bodies are all sourced from the same OSM extract — enable <strong>All Features</strong> in extraction settings to include waterways and lakes.
+              </p>
+            </div>
+
+            <div className="subtab-row" aria-label="Geospatial input mode">
+              <button
+                className={`subtab-button ${scnGeoTab === "select" ? "is-active" : ""}`}
+                onClick={() => setScnGeoTab("select")}
+              >
+                Select Network
+              </button>
+              <button
+                className={`subtab-button ${scnGeoTab === "extract" ? "is-active" : ""}`}
+                onClick={() => setScnGeoTab("extract")}
+              >
+                Extract from OSM
+              </button>
+            </div>
+
+            {/* ── Select Network tab ── */}
+            {scnGeoTab === "select" ? (
+              <div className="scn-network-select">
+                <label className="field-label">
+                  City / Network
+                  <select
+                    className="select-input"
+                    value={selectedCitySlug}
+                    onChange={(e) => {
+                      setSelectedCitySlug(e.target.value);
+                      setSelectedWayIds([]);
+                    }}
+                  >
+                    <option value="">— select an extracted network —</option>
+                    {cities.map((c) => (
+                      <option key={c.slug} value={c.slug}>{c.display_name}</option>
+                    ))}
+                  </select>
+                </label>
+                {selectedCityPreview ? (
+                  <div className="scn-network-stats">
+                    <div className="ved-metric-card">
+                      <span className="ved-metric-label">road segments</span>
+                      <span className="ved-metric-value">{selectedCityPreview.stats.feature_count.toLocaleString()}</span>
+                    </div>
+                    <div className="ved-metric-card">
+                      <span className="ved-metric-label">speed tagged</span>
+                      <span className="ved-metric-value">{selectedCityPreview.stats.with_speed_limit.toLocaleString()}</span>
+                    </div>
+                    <div className="ved-metric-card">
+                      <span className="ved-metric-label">signalized nodes</span>
+                      <span className="ved-metric-value">{selectedCityPreview.stats.signalized_intersection_count.toLocaleString()}</span>
+                    </div>
+                    <div className="ved-metric-card">
+                      <span className="ved-metric-label">OSM path</span>
+                      <span className="ved-metric-value" style={{ fontSize: "0.72rem", wordBreak: "break-all" }}>
+                        {selectedCityPreview.source_path}
+                      </span>
+                    </div>
+                  </div>
+                ) : selectedCitySlug ? (
+                  <p className="muted">Loading network preview…</p>
+                ) : (
+                  <p className="muted">No extracted networks yet. Use the <strong>Extract from OSM</strong> tab to download one, or go to <strong>Data &amp; Integrations → Data Pipeline</strong>.</p>
+                )}
+              </div>
+            ) : null}
+
+            {/* ── Extract from OSM tab ── */}
+            {scnGeoTab === "extract" ? (
+              <div className="workflow-stack">
+                <section className="workflow-card">
+                  <div className="workflow-head">
+                    <div>
+                      <h3>Search &amp; Bootstrap</h3>
+                      <p className="workflow-description">Resolve a place with Nominatim, set the city slug, and download the OSM extract. Enabling <em>All Features</em> includes rivers, lakes, and other geographic bodies.</p>
+                    </div>
+                    <code>{osmWorkflow?.module}</code>
+                  </div>
+                  <div className="search-row">
+                    <input
+                      type="text"
+                      value={locationQuery}
+                      onChange={(e) => setLocationQuery(e.target.value)}
+                      placeholder="Search city, district, corridor, or municipality"
+                      onKeyDown={(e) => e.key === "Enter" && void searchLocations()}
+                    />
+                    <button className="primary-button" onClick={() => void searchLocations()}>
+                      Search OSM
+                    </button>
+                  </div>
+                  {locationResults.length > 0 ? (
+                    <div className="location-results">
+                      {locationResults.map((loc) => (
+                        <button
+                          key={`${loc.osm_type}-${loc.osm_id}`}
+                          className={`location-row ${selectedLocation?.osm_id === loc.osm_id ? "is-selected" : ""}`}
+                          onClick={() => selectLocation(loc)}
+                        >
+                          <strong>{loc.country || "Unknown country"} / {loc.city || loc.state || "Unknown locality"}</strong>
+                          <span>{loc.display_name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="muted">Search results appear here. Selecting one fills the city scaffold and boundary controls automatically.</p>
+                  )}
+                </section>
+
+                <section className="structured-group-card">
+                  <h4>City Bootstrap</h4>
+                  <div className="structured-fields-grid">
+                    {["place", "city_slug", "out", "config_out"].map((name) => {
+                      const field = osmFieldsByName[name];
+                      if (!field) return null;
+                      return (
+                        <WorkflowInput
+                          key={name}
+                          field={field}
+                          value={osmValues[name]}
+                          onChange={(next) => {
+                            updateWorkflowValue("integration.fetch_osm", name, next);
+                            if (name === "city_slug" && typeof next === "string") {
+                              setSelectedCitySlug(next);
+                              applyCityScaffoldDefaults(next);
+                            }
+                          }}
+                          configPaths={configPaths}
+                          configPathGroups={configPathGroups}
+                          dataOutputFolders={dataOutputFolderPaths}
+                          cities={cities}
+                        />
+                      );
+                    })}
+                  </div>
+                </section>
+
+                <section className="structured-group-card">
+                  <h4>Extraction Settings</h4>
+                  <div className="structured-fields-grid">
+                    {["pad_km", "road_types", "all_features"].map((name) => {
+                      const field = osmFieldsByName[name];
+                      if (!field) return null;
+                      return (
+                        <WorkflowInput
+                          key={name}
+                          field={field}
+                          value={osmValues[name]}
+                          onChange={(next) => updateWorkflowValue("integration.fetch_osm", name, next)}
+                          configPaths={configPaths}
+                          configPathGroups={configPathGroups}
+                          dataOutputFolders={dataOutputFolderPaths}
+                          cities={cities}
+                        />
+                      );
+                    })}
+                  </div>
+                  <p className="muted" style={{ fontSize: "0.78rem", marginTop: "0.5rem" }}>
+                    Enable <strong>All Features</strong> to include rivers, lakes, and other geographic bodies in the extract alongside road networks.
+                  </p>
+                </section>
+
+                <section className="structured-group-card">
+                  <h4>Bounding Box</h4>
+                  <div className="bounds-grid">
+                    {(["South", "West", "North", "East"] as const).map((label, index) => (
+                      <label key={label} className="field">
+                        <span>{label}</span>
+                        <input
+                          type="number"
+                          value={activeMapBounds?.[index] ?? ""}
+                          onChange={(e) => updateBounds(index, Number(e.target.value))}
+                        />
+                      </label>
+                    ))}
+                  </div>
+                </section>
+
+                <div className="workflow-actions">
+                  <button className="primary-button" onClick={() => void launchWorkflow("integration.fetch_osm")}>
+                    Launch OSM Download
+                  </button>
+                  <button
+                    className="secondary-button"
+                    onClick={() => { setDataTab("osm"); setOsmSubtab("new"); setView("view_edit_data"); setVedTab("pipeline"); }}
+                  >
+                    Open Full Tool in Data Pipeline
+                  </button>
+                </div>
+              </div>
+            ) : null}
+
+            <div className="scn-nav-row">
+              <span />
+              <button
+                className="primary-button"
+                disabled={!selectedCitySlug}
+                title={!selectedCitySlug ? "Select a city network first" : undefined}
+                onClick={() => setScnStep(isBaseline ? "road" : "disruption")}
+              >
+                Next →
+              </button>
+            </div>
+          </div>
+        ) : null}
+
+        {/* ── Step 2: Disruption (simulation only) ── */}
+        {scnStep === "disruption" && !isBaseline ? (
+          <div className="scn-step-content">
+            <div className="scn-step-title">
+              <h3>Disruption Configuration</h3>
+              <p className="muted">Select the disruption type and fill in its parameters. Severity and period apply to all types.</p>
+            </div>
+
+            {/* Type selector */}
+            <div className="scn-disruption-grid">
+              {Object.entries(DISRUPTION_TYPES).filter(([k]) => k !== "base").map(([k, v]) => (
+                <button
+                  key={k}
+                  className={`scn-type-card ${scnDisruptionType === k ? "is-active" : ""}`}
+                  onClick={() => setScnDisruptionType(k as "flood" | "flash_flood" | "snowfall" | "earthquake" | "heatwave" | "road_close" | "evacuation" | "congestion" | "exogenous")}
+                >
+                  {v.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Type-specific params */}
+            {(DISRUPTION_TYPES[scnDisruptionType]?.params ?? []).length > 0 ? (
+              <div className="scn-fields-stack" style={{ marginTop: "1.25rem" }}>
+                <h4 className="scn-subsection-title">{DISRUPTION_TYPES[scnDisruptionType].label} Parameters</h4>
+                {DISRUPTION_TYPES[scnDisruptionType].params.map((p) => (
+                  <ScnFieldRow
+                    key={p}
+                    paramKey={p}
+                    mode={getScnParam(p).mode}
+                    value={getScnParam(p).value}
+                    onModeChange={(m) => setScnParam(p, { mode: m })}
+                    onValueChange={(v) => setScnParam(p, { value: v })}
+                  />
+                ))}
+              </div>
+            ) : null}
+
+            {/* Severity + Period */}
+            <div className="scn-fields-stack" style={{ marginTop: "1.25rem" }}>
+              <h4 className="scn-subsection-title">Severity &amp; Period</h4>
+              <div className="scn-field-row">
+                <div className="scn-field-header">
+                  <span className="scn-field-label">Severity</span>
+                </div>
+                <div className="scn-severity-row">
+                  {["low", "moderate", "high", "extreme"].map((s) => (
+                    <button
+                      key={s}
+                      className={`scn-severity-btn ${scnDisruptionSeverity === s ? "is-active" : ""}`}
+                      onClick={() => setScnDisruptionSeverity(s)}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="scn-field-row">
+                <div className="scn-field-header">
+                  <span className="scn-field-label">Duration / Period <span className="scn-field-unit">(seconds)</span></span>
+                </div>
+                <input
+                  type="number"
+                  className="text-input"
+                  placeholder="e.g. 3600"
+                  value={scnDisruptionPeriod}
+                  onChange={(e) => setScnDisruptionPeriod(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Triage */}
+            <div className="scn-fields-stack" style={{ marginTop: "1.25rem" }}>
+              <h4 className="scn-subsection-title">Triage Configuration</h4>
+              <div className="scn-input-toggle">
+                <button
+                  className={`scn-toggle-btn ${scnTriageMode === "select_base_city" ? "is-active" : ""}`}
+                  onClick={() => setScnTriageMode("select_base_city")}
+                >Select Base City</button>
+                <button
+                  className={`scn-toggle-btn ${scnTriageMode === "manual_input" ? "is-active" : ""}`}
+                  onClick={() => setScnTriageMode("manual_input")}
+                >Manual Input</button>
+              </div>
+
+              {scnTriageMode === "select_base_city" ? (
+                <div className="scn-triage-city">
+                  <label className="field-label">
+                    Base City
+                    <select
+                      className="select-input"
+                      value={scnTriageCity}
+                      onChange={(e) => setScnTriageCity(e.target.value)}
+                    >
+                      <option value="">— select city —</option>
+                      {cities.map((c) => (
+                        <option key={c.slug} value={c.slug}>{c.display_name}</option>
+                      ))}
+                    </select>
+                  </label>
+                  {scnTriageCity ? (
+                    <div className="scn-scenario-picker">
+                      <p className="muted" style={{ marginBottom: "0.5rem" }}>Pick a baseline scenario to use as triage reference:</p>
+                      {(["a", "b", "c"] as const).map((letter) => {
+                        const candidateRuns = resultRuns.filter((r) => !r.has_accidents && r.city === scnTriageCity);
+                        const run = candidateRuns[letter === "a" ? 0 : letter === "b" ? 1 : 2] ?? null;
+                        return (
+                          <div
+                            key={letter}
+                            className={`scn-scenario-row ${scnTriageScenario === letter ? "is-selected" : ""}`}
+                            onClick={() => run && setScnTriageScenario(letter)}
+                          >
+                            <span className="scn-scenario-label">Scenario {letter.toUpperCase()}</span>
+                            {run ? (
+                              <>
+                                <span className="muted">{run.name}</span>
+                                <button
+                                  className="secondary-button small"
+                                  onClick={(e) => { e.stopPropagation(); setSelectedFile(run.run_root); setView("view_past_simulations"); }}
+                                >View KPIs / Metrics</button>
+                              </>
+                            ) : (
+                              <span className="muted">No baseline run available for slot {letter.toUpperCase()}</span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : null}
+                </div>
+              ) : (
+                <div className="scn-fields-stack">
+                  {TRIAGE_MANUAL_FIELDS.map((f) => (
+                    <div key={f.key} className="scn-field-row">
+                      <div className="scn-field-header">
+                        <span className="scn-field-label">{f.label}</span>
+                        <span className="scn-input-badge manual">manual_input</span>
+                      </div>
+                      <input
+                        type="text"
+                        className="text-input"
+                        placeholder={f.placeholder}
+                        value={scnTriageManual[f.key] ?? ""}
+                        onChange={(e) => setScnTriageManual((prev) => ({ ...prev, [f.key]: e.target.value }))}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="scn-nav-row">
+              <button className="secondary-button" onClick={() => setScnStep("geospatial")}>← Back</button>
+              <button className="primary-button" onClick={() => setScnStep("road")}>Next →</button>
+            </div>
+          </div>
+        ) : null}
+
+        {/* ── Step: Road ODs ── */}
+        {scnStep === "road" ? (
+          <div className="scn-step-content">
+            <div className="scn-step-title">
+              <h3>Road-Related Inputs</h3>
+              <p className="muted">Origin-destination matrices define travel demand. Provide a path to an OD file or enter values manually.</p>
+            </div>
+            <div className="scn-fields-stack">
+              <ScnFieldRow
+                paramKey="ods"
+                mode={scnOdsMode}
+                value={scnOds}
+                onModeChange={setScnOdsMode}
+                onValueChange={setScnOds}
+              />
+            </div>
+            <div className="scn-nav-row">
+              <button className="secondary-button" onClick={() => setScnStep(isBaseline ? "geospatial" : "disruption")}>← Back</button>
+              <button className="primary-button" onClick={() => setScnStep("launch")}>Next →</button>
+            </div>
+          </div>
+        ) : null}
+
+        {/* ── Step: Launch ── */}
+        {scnStep === "launch" ? (
+          <div className="scn-step-content">
+            <div className="scn-step-title">
+              <h3>{isBaseline ? "Save Baseline &amp; Launch" : "Save &amp; Launch Simulation"}</h3>
+              <p className="muted">Review the configuration summary below, then save to the Functional DB and launch the SUMO run.</p>
+            </div>
+
+            {/* Config summary */}
+            <div className="scn-summary-card">
+              <div className="scn-summary-row"><span>Disruption type</span><strong>{isBaseline ? "base (no disruption)" : DISRUPTION_TYPES[scnDisruptionType]?.label ?? scnDisruptionType}</strong></div>
+              {!isBaseline && scnDisruptionType !== "base" ? (
+                <>
+                  <div className="scn-summary-row"><span>Severity</span><strong>{scnDisruptionSeverity}</strong></div>
+                  {scnDisruptionPeriod ? <div className="scn-summary-row"><span>Duration</span><strong>{scnDisruptionPeriod} s</strong></div> : null}
+                </>
+              ) : null}
+              <div className="scn-summary-row">
+                <span>Network (AoE)</span>
+                <strong>{selectedCitySlug ? cities.find((c) => c.slug === selectedCitySlug)?.display_name ?? selectedCitySlug : <em className="muted">not selected</em>}</strong>
+              </div>
+              <div className="scn-summary-row"><span>Road ODs</span><strong>{scnOds || <em className="muted">not set</em>}</strong></div>
+            </div>
+
+            {/* Save targets */}
+            <div className="scn-save-targets">
+              <button className="secondary-button" disabled title="Save to Functional DB — connector not yet implemented (D3.5)">
+                Save to Functional DB
+              </button>
+              <button className="secondary-button" disabled title="Save to Ontology DB — connector not yet implemented (D3.4)">
+                Save to Ontology DB
+              </button>
+            </div>
+
+            <div className="scn-nav-row" style={{ marginTop: "0.5rem" }}>
+              <button className="secondary-button" onClick={() => setScnStep("road")}>← Back</button>
+              <button
+                className="primary-button"
+                onClick={() => setScnBuilderTab("run")}
+              >
+                Proceed to Run Simulator →
+              </button>
+            </div>
+          </div>
+        ) : null}
+      </div>
+    );
+  };
 
   const renderSimulationsSection = () => {
     const workflows =
@@ -3045,97 +3817,161 @@ export default function App() {
                   <p>{runningJobsCount} running</p>
                 </div>
               </div>
+              <div className="notification-wrap">
+                <button
+                  type="button"
+                  className={`notification-button ${notifications.some((n) => !n.read) ? "has-unread" : ""}`}
+                  aria-label="Notifications"
+                  onClick={() => {
+                    setNotificationsOpen((prev) => !prev);
+                    setSettingsOpen(false);
+                    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+                  }}
+                >
+                  <Icon name="notification" />
+                  {notifications.some((n) => !n.read) ? (
+                    <span className="notification-badge">{notifications.filter((n) => !n.read).length}</span>
+                  ) : null}
+                </button>
+                {notificationsOpen ? (
+                  <div className="notification-popover">
+                    <strong>Notifications</strong>
+                    {notifications.length ? (
+                      <div className="notification-list">
+                        {notifications.slice(0, 8).map((n) => (
+                          <div key={n.id} className="notification-item">
+                            <strong>{n.title}</strong>
+                            <p>{n.body}</p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="muted">No notifications yet.</p>
+                    )}
+                    <button className="secondary-button" onClick={() => setNotifications([])}>Clear All</button>
+                  </div>
+                ) : null}
+              </div>
               {renderSettingsMenu("header")}
             </div>
           ) : null}
         </header>
 
-        {view === "overview" ? (
+        {view === "stakeholder_dashboard" ? (
           <section className="content-grid overview-grid">
-            <article className="panel metric-panel">
+            <article className="panel" style={{ gridColumn: "1 / -1" }}>
               <div className="section-header">
-                <h2>
-                  <TitleWithInfo label="Overview guide" onClick={() => setInfoModal(overviewInfo)}>
-                    SUMA Workspace
-                  </TitleWithInfo>
-                </h2>
-              </div>
-              <div className="metric-list">
                 <div>
-                  <span>Configs</span>
-                  <strong>{configPaths.length}</strong>
+                  <h2>Stakeholder Dashboard</h2>
+                  <p className="muted">Navigate to any section of the AntifragiCity SUMA platform.</p>
                 </div>
-                <div>
-                  <span>Workflows</span>
-                  <strong>{workflowSpecs.length}</strong>
-                </div>
-                <div>
-                  <span>Jobs</span>
-                  <strong>{jobs.length}</strong>
-                </div>
-                <div>
-                  <span>Result Runs</span>
-                  <strong>{resultRuns.length}</strong>
+                <div className="button-row">
+                  <span className="chip">{runningJobsCount} running</span>
+                  <span className="chip">{resultRuns.length} result runs</span>
+                  <span className="chip">{configPaths.length} configs</span>
                 </div>
               </div>
-            </article>
-            <article className="panel">
-              <h2>Active Job</h2>
-              {selectedJob ? (
-                <>
-                  <p className="job-title">{selectedJob.title}</p>
-                  <div className="progress-track">
-                    <div className="progress-fill" style={{ width: `${(selectedJob.progress ?? 0) * 100}%` }} />
-                  </div>
-                  <p className="job-status">
-                    {selectedJob.status} · {selectedJob.progress_label}
-                  </p>
-                  {selectedJob.live_progress_path ? (
-                    <img className="live-image" src={`${api.fileUrl(selectedJob.live_progress_path)}&t=${Date.now()}`} alt="Live progress" />
-                  ) : (
-                    <p className="muted">No live image available yet.</p>
-                  )}
-                </>
-              ) : (
-                <p className="muted">No jobs have been started yet.</p>
-              )}
-            </article>
-            <article className="panel">
-              <h2>Current Pipeline</h2>
-              <div className="overview-pipeline">
-                {[
-                  ["Data", `${cities.length} extracted city folder(s)`],
-                  ["OD Build", `${generatorWorkflows.length} generator workflow(s)`],
-                  ["Simulation", `${workflowGroups["Simulations"]?.length ?? 0} simulator workflow(s)`],
-                  ["Analysis", `${workflowGroups["Analysis"]?.length ?? 0} analysis workflow(s)`],
-                ].map(([title, body]) => (
-                  <button key={title} className="pipeline-step" onClick={() => {
-                    if (title === "Data") setView("data_integrations");
-                    if (title === "OD Build") setView("generators");
-                    if (title === "Simulation") setView("simulations");
-                    if (title === "Analysis") setView("analysis");
-                  }}>
-                    <strong>{title}</strong>
-                    <span>{body}</span>
+              <div className="dashboard-hub-grid">
+                {([
+                  {
+                    key: "view_edit_data" as ViewKey,
+                    label: "View / Edit Data",
+                    icon: "data" as const,
+                    desc: "Browse and configure city network data, OSM extracts, and traffic feeds.",
+                  },
+                  {
+                    key: "simulation_creation" as ViewKey,
+                    label: "Simulation Creation",
+                    icon: "config" as const,
+                    desc: "Configure and launch new SUMO-based incident simulations.",
+                  },
+                  {
+                    key: "baseline_scenario_creation" as ViewKey,
+                    label: "Baseline Scenario Creation",
+                    icon: "baseline" as const,
+                    desc: "Define and manage baseline traffic scenarios for comparison.",
+                  },
+                  {
+                    key: "view_past_simulations" as ViewKey,
+                    label: "View Past Simulations",
+                    icon: "results" as const,
+                    desc: "Inspect completed simulation runs, charts, and antifragility indices.",
+                  },
+                  {
+                    key: "view_live_simulations" as ViewKey,
+                    label: "View Live Simulations",
+                    icon: "simulations" as const,
+                    desc: "Monitor currently running simulation jobs and live progress.",
+                  },
+                  {
+                    key: "view_baseline_scenarios" as ViewKey,
+                    label: "View Baseline Scenarios",
+                    icon: "baseline" as const,
+                    desc: "Review saved baseline scenarios and compare against simulated outcomes.",
+                  },
+                  {
+                    key: "view_kpis" as ViewKey,
+                    label: "View KPIs",
+                    icon: "kpis" as const,
+                    desc: "Track key performance indicators across city networks and simulations.",
+                  },
+                  {
+                    key: "social_media" as ViewKey,
+                    label: "Social Media Dashboard",
+                    icon: "social_media" as const,
+                    desc: "Monitor social media signals and public sentiment around traffic events.",
+                  },
+                  {
+                    key: "equilibrium_model" as ViewKey,
+                    label: "Equilibrium Model",
+                    icon: "equilibrium" as const,
+                    desc: "Configure and inspect the urban traffic equilibrium and antifragility model.",
+                  },
+                ] as Array<{ key: ViewKey; label: string; icon: import("./ui").IconName; desc: string }>).map((item) => (
+                  <button
+                    key={item.key}
+                    type="button"
+                    className="dashboard-hub-card"
+                    onClick={() => handleViewChange(item.key)}
+                  >
+                    <span className="hub-card-icon">
+                      <Icon name={item.icon} />
+                    </span>
+                    <strong className="hub-card-title">{item.label}</strong>
+                    <p className="hub-card-desc">{item.desc}</p>
                   </button>
                 ))}
               </div>
             </article>
-            <article className="panel">
-              <h2>Recent Results</h2>
-              <div className="compact-run-list">
-                {resultRuns.slice(0, 5).map((run) => (
-                  <button key={run.run_root} className="doc-link" onClick={() => {
-                    setSelectedFile(run.run_root);
-                    setView("results");
-                  }}>
-                    <span>{run.name}</span>
-                    <small>{run.city} · accidents {formatNumber(run.total_accidents, 0)} · AI {formatNumber(run.antifragility_index, 3)}</small>
-                  </button>
-                ))}
-                {!resultRuns.length ? <p className="muted">No result runs have been indexed yet.</p> : null}
-              </div>
-            </article>
+            {selectedJob ? (
+              <article className="panel">
+                <h2>Active Job</h2>
+                <p className="job-title">{selectedJob.title}</p>
+                <div className="progress-track">
+                  <div className="progress-fill" style={{ width: `${(selectedJob.progress ?? 0) * 100}%` }} />
+                </div>
+                <p className="job-status">{selectedJob.status} · {selectedJob.progress_label}</p>
+                {selectedJob.live_progress_path ? (
+                  <img className="live-image" src={`${api.fileUrl(selectedJob.live_progress_path)}&t=${Date.now()}`} alt="Live progress" />
+                ) : null}
+              </article>
+            ) : null}
+            {resultRuns.length > 0 ? (
+              <article className="panel">
+                <h2>Recent Results</h2>
+                <div className="compact-run-list">
+                  {resultRuns.slice(0, 5).map((run) => (
+                    <button key={run.run_root} className="doc-link" onClick={() => {
+                      setSelectedFile(run.run_root);
+                      setView("view_past_simulations");
+                    }}>
+                      <span>{run.name}</span>
+                      <small>{run.city} · accidents {formatNumber(run.total_accidents, 0)} · AI {formatNumber(run.antifragility_index, 3)}</small>
+                    </button>
+                  ))}
+                </div>
+              </article>
+            ) : null}
           </section>
         ) : null}
 
@@ -3250,8 +4086,296 @@ export default function App() {
           </section>
         ) : null}
 
-        {view === "data_integrations" ? (
+        {view === "view_edit_data" ? (
           <section className="workflow-stack">
+            <div className="primary-tab-row ved-top-tabs">
+              <button className={vedTab === "management" ? "tab-active" : ""} onClick={() => setVedTab("management")}>
+                Data Management
+              </button>
+              <button className={vedTab === "pipeline" ? "tab-active" : ""} onClick={() => setVedTab("pipeline")}>
+                Data Pipeline
+              </button>
+            </div>
+
+          {vedTab === "management" ? (
+            <div className="ved-management">
+              <div className="subtab-row" role="tablist" aria-label="Database source">
+                <button
+                  role="tab"
+                  aria-selected={vedSource === "simulation"}
+                  className={`subtab-button ${vedSource === "simulation" ? "is-active" : ""}`}
+                  onClick={() => setVedSource("simulation")}
+                >
+                  Simulation DB
+                </button>
+                <button
+                  role="tab"
+                  aria-selected={vedSource === "ontology"}
+                  className={`subtab-button ${vedSource === "ontology" ? "is-active" : ""}`}
+                  onClick={() => setVedSource("ontology")}
+                >
+                  Ontology DB
+                </button>
+                <button
+                  role="tab"
+                  aria-selected={vedSource === "functional"}
+                  className={`subtab-button ${vedSource === "functional" ? "is-active" : ""}`}
+                  onClick={() => setVedSource("functional")}
+                >
+                  Functional DB
+                </button>
+              </div>
+
+              {vedSource === "simulation" ? (
+                <div className="ved-split">
+                  <div className="ved-browser">
+                    <div className="ved-search-row">
+                      <Icon name="search" />
+                      <input
+                        type="text"
+                        placeholder="Filter runs…"
+                        value={vedRunFilter}
+                        onChange={(e) => setVedRunFilter(e.target.value)}
+                      />
+                    </div>
+                    <ul className="ved-run-list">
+                      {resultRuns
+                        .filter(
+                          (r) =>
+                            !vedRunFilter ||
+                            r.name.toLowerCase().includes(vedRunFilter.toLowerCase()) ||
+                            r.city.toLowerCase().includes(vedRunFilter.toLowerCase()),
+                        )
+                        .map((r) => (
+                          <li
+                            key={r.run_root}
+                            className={`ved-run-item ${vedSelectedRunRoot === r.run_root ? "is-selected" : ""}`}
+                            onClick={() => setVedSelectedRunRoot(r.run_root)}
+                          >
+                            <div className="ved-run-name">{r.name || r.run_root.split("/").pop()}</div>
+                            <div className="ved-run-meta">
+                              <span>{r.city}</span>
+                              {r.has_accidents ? <span className="tag-accent">accidents</span> : null}
+                              {r.has_antifragility ? <span className="tag-accent">antifragility</span> : null}
+                              {r.antifragility_index != null ? (
+                                <span className={r.antifragility_index > 0 ? "tag-green" : "tag-warn"}>
+                                  AI {r.antifragility_index.toFixed(3)}
+                                </span>
+                              ) : null}
+                            </div>
+                          </li>
+                        ))}
+                      {resultRuns.length === 0 ? <li className="ved-run-empty">No simulation runs found.</li> : null}
+                    </ul>
+                  </div>
+
+                  <div className="ved-editor">
+                    {!vedSelectedRunRoot ? (
+                      <div className="ved-empty-state">
+                        <Icon name="data" />
+                        <p>Select a simulation run from the list to view and edit its data.</p>
+                      </div>
+                    ) : vedSummaryLoading ? (
+                      <div className="ved-loading">Loading run data…</div>
+                    ) : vedSelectedSummary ? (
+                      <>
+                        <div className="ved-editor-header">
+                          <h3>{(vedSelectedSummary.metadata?.name as string) || vedSelectedRunRoot.split("/").pop()}</h3>
+                          <span className="ved-run-path muted">{vedSelectedRunRoot}</span>
+                        </div>
+
+                        <div className="ved-metrics-grid">
+                          {vedSelectedSummary.metrics?.stats
+                            ? Object.entries(vedSelectedSummary.metrics.stats)
+                                .slice(0, 8)
+                                .map(([k, v]) => (
+                                  <div key={k} className="ved-metric-card">
+                                    <span className="ved-metric-label">{k.replace(/_/g, " ")}</span>
+                                    <span className="ved-metric-value">
+                                      {typeof v === "number" ? v.toFixed(3) : String(v)}
+                                    </span>
+                                  </div>
+                                ))
+                            : null}
+                          {vedSelectedSummary.accidents ? (
+                            <>
+                              <div className="ved-metric-card">
+                                <span className="ved-metric-label">accident count</span>
+                                <span className="ved-metric-value">{vedSelectedSummary.accidents.count}</span>
+                              </div>
+                              <div className="ved-metric-card accent">
+                                <span className="ved-metric-label">max queue length</span>
+                                <span className="ved-metric-value">
+                                  {vedSelectedSummary.accidents.max_queue_length_vehicles} veh
+                                </span>
+                              </div>
+                            </>
+                          ) : null}
+                          {vedSelectedSummary.antifragility?.antifragility_index != null ? (
+                            <div
+                              className={`ved-metric-card ${
+                                vedSelectedSummary.antifragility.antifragility_index > 0 ? "green" : "warn"
+                              }`}
+                            >
+                              <span className="ved-metric-label">antifragility index</span>
+                              <span className="ved-metric-value">
+                                {vedSelectedSummary.antifragility.antifragility_index.toFixed(4)}
+                              </span>
+                            </div>
+                          ) : null}
+                        </div>
+
+                        <div className="ved-edit-section">
+                          <h4>Edit Record</h4>
+                          <label className="field-label">
+                            Name
+                            <input
+                              type="text"
+                              className="text-input"
+                              value={vedEditName}
+                              onChange={(e) => setVedEditName(e.target.value)}
+                              placeholder="Descriptive run name…"
+                            />
+                          </label>
+                          <label className="field-label">
+                            Notes
+                            <textarea
+                              className="text-input"
+                              rows={3}
+                              value={vedEditNotes}
+                              onChange={(e) => setVedEditNotes(e.target.value)}
+                              placeholder="Free-form notes about this run…"
+                            />
+                          </label>
+                          <label className="field-label">
+                            Tags <span className="muted">(comma-separated)</span>
+                            <input
+                              type="text"
+                              className="text-input"
+                              value={vedEditTags}
+                              onChange={(e) => setVedEditTags(e.target.value)}
+                              placeholder="e.g. flood, night, calibrated…"
+                            />
+                          </label>
+                          <label className="checkbox-label">
+                            <input
+                              type="checkbox"
+                              checked={vedMarkBaseline}
+                              onChange={(e) => setVedMarkBaseline(e.target.checked)}
+                            />
+                            Mark as baseline scenario
+                          </label>
+                        </div>
+
+                        <div className="ved-kpi-section">
+                          <div className="ved-kpi-header">
+                            <h4>KPI Overrides</h4>
+                            <button
+                              type="button"
+                              className="secondary-button small"
+                              onClick={() => setVedShowKpiEdit((v) => !v)}
+                            >
+                              {vedShowKpiEdit ? "Hide" : "Edit KPIs"}
+                            </button>
+                          </div>
+                          {vedShowKpiEdit ? (
+                            <div className="ved-kpi-grid">
+                              {(["M", "R", "C", "S"] as const).map((k) => (
+                                <label key={k} className="field-label">
+                                  {k}
+                                  <input
+                                    type="number"
+                                    min={0}
+                                    max={1}
+                                    step={0.01}
+                                    className="text-input"
+                                    value={vedKpiOverride[k]}
+                                    onChange={(e) =>
+                                      setVedKpiOverride((prev) => ({ ...prev, [k]: parseFloat(e.target.value) }))
+                                    }
+                                  />
+                                </label>
+                              ))}
+                            </div>
+                          ) : null}
+                        </div>
+
+                        <div className="ved-actions">
+                          <button
+                            type="button"
+                            className="primary-button"
+                            onClick={() => {
+                              const dataStr = JSON.stringify(vedSelectedSummary, null, 2);
+                              const blob = new Blob([dataStr], { type: "application/json" });
+                              const url = URL.createObjectURL(blob);
+                              const a = document.createElement("a");
+                              a.href = url;
+                              a.download = `${vedSelectedRunRoot.split("/").pop() ?? "run"}_summary.json`;
+                              a.click();
+                              URL.revokeObjectURL(url);
+                            }}
+                          >
+                            Export JSON
+                          </button>
+                          <button
+                            type="button"
+                            className="primary-button"
+                            disabled
+                            title="Save to Simulation DB — coming soon"
+                          >
+                            Save Changes
+                          </button>
+                          <button
+                            type="button"
+                            className="secondary-button"
+                            disabled
+                            title="Save to Ontology DB — connector not yet implemented"
+                          >
+                            Save to Ontology DB
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="ved-empty-state">
+                        <p className="muted">Could not load run data.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : null}
+
+              {vedSource === "ontology" ? (
+                <div className="ved-placeholder">
+                  <div className="stub-icon">
+                    <Icon name="data" />
+                  </div>
+                  <h3>Ontology DB</h3>
+                  <p>
+                    The Ontology Database connector is not yet implemented. This panel will allow browsing and editing
+                    semantic knowledge graph entries linked to simulation events, road segments, and mobility patterns.
+                  </p>
+                  <span className="badge-outline">Planned — D3.4</span>
+                </div>
+              ) : null}
+
+              {vedSource === "functional" ? (
+                <div className="ved-placeholder">
+                  <div className="stub-icon">
+                    <Icon name="data" />
+                  </div>
+                  <h3>Functional DB</h3>
+                  <p>
+                    The Functional Database connector is not yet implemented. This panel will allow viewing and editing
+                    computed KPI records, equilibrium model outputs, and antifragility assessments stored in structured
+                    form.
+                  </p>
+                  <span className="badge-outline">Planned — D3.5</span>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
+          {vedTab === "pipeline" ? (
             <article className="panel">
               <div className="section-header">
                 <div>
@@ -4050,16 +5174,69 @@ export default function App() {
                 </div>
               )}
             </article>
+          ) : null}
           </section>
         ) : null}
 
         {view === "generators" ? renderGeneratorsSection() : null}
 
-        {view === "simulations" ? renderSimulationsSection() : null}
+        {view === "simulation_creation" ? (
+          <section className="workflow-stack">
+            <article className="panel">
+              <div className="section-header">
+                <div>
+                  <h2>Simulation Creation</h2>
+                  <p className="muted">Configure scenario parameters then launch the SUMA simulation engine.</p>
+                </div>
+                <GuideButton label="Method Guide" onClick={() => setInfoModal(simulationInfo)} />
+              </div>
+              <div className="primary-tab-row">
+                <button
+                  className={scnBuilderTab === "builder" ? "tab-active" : ""}
+                  onClick={() => setScnBuilderTab("builder")}
+                >
+                  Scenario Builder
+                </button>
+                <button
+                  className={scnBuilderTab === "run" ? "tab-active" : ""}
+                  onClick={() => setScnBuilderTab("run")}
+                >
+                  Run Simulator
+                </button>
+              </div>
+              {scnBuilderTab === "builder" ? renderScnBuilder(false) : null}
+              {scnBuilderTab === "run" ? (
+                <>
+                  <div className="subtab-row" aria-label="Simulation tabs" style={{ marginTop: "0.75rem" }}>
+                    <button className={`subtab-button ${simulationSubtab === "run" ? "is-active" : ""}`} onClick={() => setSimulationSubtab("run")}>
+                      Run Simulator
+                    </button>
+                    <button className={`subtab-button ${simulationSubtab === "assessment" ? "is-active" : ""}`} onClick={() => setSimulationSubtab("assessment")}>
+                      Resilience Assessment
+                    </button>
+                  </div>
+                  <section className="structured-group-card">
+                    <h4>{simulationSubtab === "run" ? "Run Simulator" : "Resilience Assessment"}</h4>
+                    <p className="muted">
+                      {simulationSubtab === "run"
+                        ? "Use this when you want one scenario or a repeated seed batch from a single YAML config."
+                        : "Use this when you want a stress-test matrix across demand levels, incident settings, and seeds."}
+                    </p>
+                    {renderWorkflowCards(
+                      simulationSubtab === "run"
+                        ? activeCategoryWorkflows.filter((wf) => wf.id === "simulation.run")
+                        : activeCategoryWorkflows.filter((wf) => wf.id === "assessment.run"),
+                    )}
+                  </section>
+                </>
+              ) : null}
+            </article>
+          </section>
+        ) : null}
 
         {view === "analysis" ? renderAnalysisSection() : null}
 
-        {view === "jobs" ? (
+        {view === "view_live_simulations" ? (
           <section className="content-grid jobs-grid">
             <article className="panel">
               <div className="section-header">
@@ -4138,7 +5315,7 @@ export default function App() {
           </section>
         ) : null}
 
-        {view === "results" ? (
+        {view === "view_past_simulations" ? (
           <section className="results-layout">
             <article className="panel results-tree-panel">
               <div className="section-header">
@@ -4494,6 +5671,443 @@ export default function App() {
                 )}
               </article>
             </div>
+          </section>
+        ) : null}
+
+        {view === "social_media" ? (
+          <section className="content-grid">
+            <article className="panel" style={{ gridColumn: "1 / -1" }}>
+              <div className="section-header">
+                <div>
+                  <h2>Social Media Dashboard</h2>
+                  <p className="muted">Monitor public social media signals and sentiment around urban mobility events in real time.</p>
+                </div>
+                <span className="chip">Coming Soon</span>
+              </div>
+              <div className="stub-placeholder">
+                <Icon name="social_media" />
+                <h3>Social Signal Integration</h3>
+                <p>This module will aggregate and analyse posts, reports, and sentiment from social platforms (X/Twitter, Facebook, local news feeds) correlated with active simulation incidents and KPI anomalies.</p>
+                <div className="stub-feature-list">
+                  <div className="stub-feature-item"><strong>Live Feed Monitor</strong><span>Real-time ingestion of social posts tagged with city incident keywords.</span></div>
+                  <div className="stub-feature-item"><strong>Sentiment Analysis</strong><span>Automated scoring of public mood around traffic disruptions.</span></div>
+                  <div className="stub-feature-item"><strong>Incident Correlation</strong><span>Align social spikes with active SUMA simulation incidents on a shared timeline.</span></div>
+                  <div className="stub-feature-item"><strong>Alert Threshold</strong><span>Configurable alert level when social signal volume exceeds baseline.</span></div>
+                </div>
+              </div>
+            </article>
+          </section>
+        ) : null}
+
+        {view === "view_kpis" ? (
+          <section className="content-grid">
+            <article className="panel" style={{ gridColumn: "1 / -1" }}>
+              <div className="section-header">
+                <div>
+                  <h2>View KPIs</h2>
+                  <p className="muted">Track key performance indicators across city networks, simulations, and resilience assessments.</p>
+                </div>
+                <span className="chip">Coming Soon</span>
+              </div>
+              <div className="stub-placeholder">
+                <Icon name="kpis" />
+                <h3>KPI Framework</h3>
+                <p>This module will surface the AntifragiCity D2.7 KPI framework indicators — network-level, incident-level, and resilience-level metrics aggregated across all simulation runs.</p>
+                <div className="stub-feature-list">
+                  <div className="stub-feature-item"><strong>Antifragility Index</strong><span>Aggregate AI across all runs, segmented by city and scenario.</span></div>
+                  <div className="stub-feature-item"><strong>Network Throughput</strong><span>Vehicles/hour completing routes under baseline vs incident conditions.</span></div>
+                  <div className="stub-feature-item"><strong>Recovery Time</strong><span>Mean time for network speed to return to pre-incident baseline.</span></div>
+                  <div className="stub-feature-item"><strong>Incident Frequency</strong><span>Observed vs modelled accident rate by severity tier and road type.</span></div>
+                </div>
+                {resultRuns.length > 0 ? (
+                  <div className="stub-data-preview">
+                    <h4>Available from {resultRuns.length} result run(s)</h4>
+                    <div className="metric-list">
+                      <div><span>Total runs</span><strong>{resultRuns.length}</strong></div>
+                      <div><span>With antifragility data</span><strong>{resultRuns.filter((r) => r.has_antifragility).length}</strong></div>
+                      <div><span>With accidents</span><strong>{resultRuns.filter((r) => r.has_accidents).length}</strong></div>
+                      <div><span>Cities covered</span><strong>{new Set(resultRuns.map((r) => r.city)).size}</strong></div>
+                    </div>
+                    <button className="secondary-button" onClick={() => setView("view_past_simulations")}>Open Past Simulations</button>
+                  </div>
+                ) : null}
+              </div>
+            </article>
+          </section>
+        ) : null}
+
+        {view === "view_baseline_scenarios" ? (
+          <section className="content-grid">
+            <article className="panel" style={{ gridColumn: "1 / -1" }}>
+              <div className="section-header">
+                <div>
+                  <h2>View Baseline Scenarios</h2>
+                  <p className="muted">Review saved baseline traffic scenarios and compare them against simulation outcomes.</p>
+                </div>
+                <div className="button-row">
+                  <button className="primary-button" onClick={() => setView("baseline_scenario_creation")}>Create Baseline</button>
+                </div>
+              </div>
+              <div className="stub-placeholder">
+                <Icon name="baseline" />
+                <h3>Baseline Scenario Library</h3>
+                <p>Baseline scenarios represent reference traffic states — accident-free runs at specified demand levels and seeds — used to normalise KPIs and compute the Antifragility Index.</p>
+                <div className="stub-feature-list">
+                  <div className="stub-feature-item"><strong>Saved Baselines</strong><span>Library of named, versioned baseline runs per city and demand level.</span></div>
+                  <div className="stub-feature-item"><strong>Comparison View</strong><span>Side-by-side speed, throughput, and delay metrics vs incident runs.</span></div>
+                  <div className="stub-feature-item"><strong>MFD Overlay</strong><span>Macroscopic Fundamental Diagram comparison between baseline and incident scenarios.</span></div>
+                </div>
+                {resultRuns.filter((r) => !r.has_accidents).length > 0 ? (
+                  <div className="stub-data-preview">
+                    <h4>{resultRuns.filter((r) => !r.has_accidents).length} accident-free run(s) available as baseline candidates</h4>
+                    <div className="compact-run-list">
+                      {resultRuns.filter((r) => !r.has_accidents).slice(0, 5).map((run) => (
+                        <button key={run.run_root} className="doc-link" onClick={() => {
+                          setSelectedFile(run.run_root);
+                          setView("view_past_simulations");
+                        }}>
+                          <span>{run.name}</span>
+                          <small>{run.city} · {formatNumber(run.mean_speed_kmh, 1)} km/h mean</small>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="muted">No accident-free simulation runs found yet. Run a baseline (base_probability: 0.0) to populate this library.</p>
+                )}
+              </div>
+            </article>
+          </section>
+        ) : null}
+
+        {view === "baseline_scenario_creation" ? (
+          <section className="workflow-stack">
+            <article className="panel">
+              <div className="section-header">
+                <div>
+                  <h2>Baseline Scenario Creation</h2>
+                  <p className="muted">Define a no-disruption scenario (base type) to use as a reference for KPI normalisation and antifragility assessment.</p>
+                </div>
+                <div className="button-row">
+                  <button className="secondary-button" onClick={() => setView("view_baseline_scenarios")}>View Baselines</button>
+                  <button className="secondary-button" onClick={() => setView("simulation_creation")}>Go to Simulation Creation</button>
+                </div>
+              </div>
+              {renderScnBuilder(true)}
+              {scnStep === "launch" && scnBuilderTab === "run" ? (
+                <>
+                  <div className="subtab-row" aria-label="Simulation tabs" style={{ marginTop: "0.75rem" }}>
+                    <button className={`subtab-button ${simulationSubtab === "run" ? "is-active" : ""}`} onClick={() => setSimulationSubtab("run")}>
+                      Run Simulator
+                    </button>
+                  </div>
+                  <section className="structured-group-card">
+                    <h4>Run Baseline Simulation</h4>
+                    <p className="muted">Launch the SUMA simulation engine with base disruption type (no incidents). Tag the result as a baseline from View / Edit Data.</p>
+                    {renderWorkflowCards(activeCategoryWorkflows.filter((wf) => wf.id === "simulation.run"))}
+                  </section>
+                </>
+              ) : null}
+            </article>
+          </section>
+        ) : null}
+
+        {view === "equilibrium_model" ? (
+          <section className="eqm-layout">
+            {/* ── Left: Input Panel ──────────────────────────────── */}
+            <article className="panel eqm-input-panel">
+              <div className="section-header">
+                <div>
+                  <h2>Equilibrium Model</h2>
+                  <p className="muted">D3.2 Tier-2 KPI vulnerability assessment for urban traffic networks</p>
+                </div>
+                <span className="chip">{eqmUseFull ? "Full Tier-2 · 6 KPI" : "Limited · 4 KPI"}</span>
+              </div>
+
+              {/* ── Data Input Mode tabs ── */}
+              <div className="primary-tab-row">
+                <button className={eqmInputMode === "simulation" ? "tab-active" : ""} onClick={() => setEqmInputMode("simulation")}>
+                  Sim DB Ingest
+                </button>
+                <button className={eqmInputMode === "manual" ? "tab-active" : ""} onClick={() => setEqmInputMode("manual")}>
+                  Manual Input
+                </button>
+                <button className={eqmInputMode === "ontology" ? "tab-active" : ""} onClick={() => setEqmInputMode("ontology")}>
+                  Ontology DB
+                </button>
+              </div>
+
+              {eqmInputMode === "simulation" ? (
+                <div className="eqm-section">
+                  <label className="field">
+                    <span>Select Simulation Run</span>
+                    <select value={eqmSimRunRoot} onChange={(e) => { setEqmSimRunRoot(e.target.value); setEqmResults(null); }}>
+                      <option value="">— choose a completed run —</option>
+                      {resultRuns.map((r) => (
+                        <option key={r.run_root} value={r.run_root}>
+                          {r.name} · {r.city}{r.has_accidents ? ` · ${r.total_accidents ?? "?"} acc.` : " · baseline"}
+                        </option>
+                      ))}
+                    </select>
+                    <small>M and S will be auto-estimated from the run&apos;s speed metrics. R and C require confirmation.</small>
+                  </label>
+                  {!resultRuns.length ? (
+                    <p className="muted">No simulation runs found. Complete a simulation first, then return here.</p>
+                  ) : null}
+                  {eqmSimRunRoot ? (
+                    <div className="workflow-note-box">
+                      <strong>Sim DB Ingest active</strong>
+                      <p>M is mapped from the mean speed ratio. S is estimated as the congestion inverse. R (redundancy) and C (flow entropy) require network-level SUMO outputs and are pre-set to neutral defaults — adjust before running.</p>
+                    </div>
+                  ) : null}
+                </div>
+              ) : eqmInputMode === "ontology" ? (
+                <div className="eqm-section eqm-ontology-placeholder">
+                  <div className="stub-placeholder" style={{ padding: "1.25rem 0", alignItems: "flex-start" }}>
+                    <Icon name="equilibrium" />
+                    <h3 style={{ textAlign: "left" }}>Ontology DB Ingest</h3>
+                    <p style={{ textAlign: "left" }}>Connection to the AntifragiCity knowledge graph is not yet implemented. KPI values will be ingested from the ontology in a future release (T4.2 / D3.3 milestone).</p>
+                    <span className="chip">Planned</span>
+                  </div>
+                </div>
+              ) : null}
+
+              {/* ── KPI Inputs (manual or after sim selected) ── */}
+              {(eqmInputMode === "manual" || (eqmInputMode === "simulation" && eqmSimRunRoot)) ? (
+                <div className="eqm-kpi-inputs">
+                  <div className="eqm-section-title-row">
+                    <h3>KPI Values</h3>
+                    <span className="muted" style={{ fontSize: "0.78rem" }}>Set all values in [0, 1]</span>
+                  </div>
+                  <EqmKpiSlider
+                    label="M — Mobility Throughput" desc="Fraction of trips that successfully arrived (N_arrived / N_total)"
+                    value={eqmKpis.M} onChange={(v) => setEqmKpis((p) => ({ ...p, M: v }))}
+                    higherIsBetter estimated={eqmInputMode === "simulation"}
+                  />
+                  <EqmKpiSlider
+                    label="R — Redundancy" desc="Average normalised edge-disjoint paths per OD pair"
+                    value={eqmKpis.R} onChange={(v) => setEqmKpis((p) => ({ ...p, R: v }))}
+                    higherIsBetter estimated={eqmInputMode === "simulation"}
+                    estimatedNote="Requires net.xml network analysis — default shown. Adjust if you have computed this separately."
+                  />
+                  <EqmKpiSlider
+                    label="C — Flow Entropy" desc="Normalised Shannon entropy of OD flow distribution"
+                    value={eqmKpis.C} onChange={(v) => setEqmKpis((p) => ({ ...p, C: v }))}
+                    higherIsBetter estimated={eqmInputMode === "simulation"}
+                    estimatedNote="Requires tripinfo.xml OD parsing — default shown. Adjust if you have computed this separately."
+                  />
+                  <EqmKpiSlider
+                    label="S — Stress Index" desc="Average volume/capacity × speed-drop across all edges"
+                    value={eqmKpis.S} onChange={(v) => setEqmKpis((p) => ({ ...p, S: v }))}
+                    higherIsBetter={false} estimated={eqmInputMode === "simulation"}
+                  />
+                  <div className="eqm-toggle-row">
+                    <BooleanSwitch checked={eqmUseFull} onChange={(v) => { setEqmUseFull(v); setEqmResults(null); }} />
+                    <span>Include Q and I — Full Tier-2 (requires equity and intermodal data)</span>
+                  </div>
+                  {eqmUseFull ? (
+                    <>
+                      <EqmKpiSlider
+                        label="Q — Equity (Theil-T)" desc="Inequality penalty across user groups (lower = more equitable)"
+                        value={eqmKpis.Q} onChange={(v) => setEqmKpis((p) => ({ ...p, Q: v }))}
+                        higherIsBetter={false}
+                      />
+                      <EqmKpiSlider
+                        label="I — Intermodal Synergy" desc="Multi-modal connection quality and transfer accessibility"
+                        value={eqmKpis.I} onChange={(v) => setEqmKpis((p) => ({ ...p, I: v }))}
+                        higherIsBetter
+                      />
+                    </>
+                  ) : null}
+                </div>
+              ) : null}
+
+              {/* ── Baseline Comparison ── */}
+              {(eqmInputMode === "manual" || (eqmInputMode === "simulation" && eqmSimRunRoot)) ? (
+                <div className="eqm-section">
+                  <div className="eqm-toggle-row">
+                    <BooleanSwitch checked={eqmCompare} onChange={(v) => { setEqmCompare(v); setEqmResults(null); }} />
+                    <span>Compare against baseline — compute system vulnerability ΔE</span>
+                  </div>
+                  {eqmCompare ? (
+                    <>
+                      <div className="subtab-row" style={{ marginTop: "0.65rem" }}>
+                        <button className={`subtab-button ${eqmBaselineInputMode === "simulation" ? "is-active" : ""}`} onClick={() => setEqmBaselineInputMode("simulation")}>
+                          Baseline from Sim
+                        </button>
+                        <button className={`subtab-button ${eqmBaselineInputMode === "manual" ? "is-active" : ""}`} onClick={() => setEqmBaselineInputMode("manual")}>
+                          Baseline Manual
+                        </button>
+                      </div>
+                      {eqmBaselineInputMode === "simulation" ? (
+                        <label className="field" style={{ marginTop: "0.5rem" }}>
+                          <span>Baseline Run (accident-free preferred)</span>
+                          <select value={eqmBaselineRunRoot} onChange={(e) => { setEqmBaselineRunRoot(e.target.value); setEqmResults(null); }}>
+                            <option value="">— select baseline run —</option>
+                            {resultRuns.filter((r) => !r.has_accidents).map((r) => (
+                              <option key={r.run_root} value={r.run_root}>{r.name} · {r.city} · baseline</option>
+                            ))}
+                            {resultRuns.filter((r) => r.has_accidents).map((r) => (
+                              <option key={r.run_root} value={r.run_root}>{r.name} · {r.city} · {r.total_accidents} acc.</option>
+                            ))}
+                          </select>
+                        </label>
+                      ) : (
+                        <div className="eqm-kpi-inputs" style={{ marginTop: "0.5rem" }}>
+                          <p className="muted" style={{ fontSize: "0.8rem", marginBottom: "0.25rem" }}>Baseline (undisturbed state) KPI values:</p>
+                          {(["M", "R", "C", "S"] as const).map((key) => (
+                            <EqmKpiSlider
+                              key={key} compact
+                              label={`${key} (baseline)`}
+                              value={eqmBaselineKpis[key]}
+                              onChange={(v) => setEqmBaselineKpis((p) => ({ ...p, [key]: v }))}
+                              higherIsBetter={key !== "S"}
+                            />
+                          ))}
+                          {eqmUseFull ? (
+                            <>
+                              <EqmKpiSlider compact label="Q (baseline)" value={eqmBaselineKpis.Q} onChange={(v) => setEqmBaselineKpis((p) => ({ ...p, Q: v }))} higherIsBetter={false} />
+                              <EqmKpiSlider compact label="I (baseline)" value={eqmBaselineKpis.I} onChange={(v) => setEqmBaselineKpis((p) => ({ ...p, I: v }))} higherIsBetter />
+                            </>
+                          ) : null}
+                        </div>
+                      )}
+                    </>
+                  ) : null}
+                </div>
+              ) : null}
+
+              {/* ── Run button ── */}
+              {(eqmInputMode === "manual" || (eqmInputMode === "simulation" && eqmSimRunRoot)) ? (
+                <div className="button-row" style={{ marginTop: "1.25rem" }}>
+                  <button className="primary-button" onClick={runEqm}>
+                    Run Equilibrium Model
+                  </button>
+                  {eqmResults ? (
+                    <button className="secondary-button" onClick={() => setEqmResults(null)}>Clear Results</button>
+                  ) : null}
+                </div>
+              ) : null}
+            </article>
+
+            {/* ── Right: Results Panel ──────────────────────────── */}
+            <article className="panel eqm-results-outer">
+              {!eqmResults ? (
+                <div className="stub-placeholder">
+                  <Icon name="kpis" />
+                  <h3>Results will appear here</h3>
+                  <p className="muted">Choose a data source, set KPI values, and click <strong>Run Equilibrium Model</strong> to compute the Tier-2 performance index and optional vulnerability assessment.</p>
+                </div>
+              ) : (() => {
+                const { E, kpisSnapshot, usedFull, E_base, dE } = eqmResults;
+                const { label: perfLabel, cls: perfCls } = eqmInterpret(E);
+                const kpiDefs: Array<{ key: string; label: string; desc: string; higherIsBetter: boolean }> = [
+                  { key: "M", label: "Mobility Throughput", desc: "N_arrived / N_total", higherIsBetter: true },
+                  { key: "R", label: "Redundancy", desc: "Edge-disjoint paths (normalised)", higherIsBetter: true },
+                  { key: "C", label: "Flow Entropy", desc: "Shannon entropy of OD flows", higherIsBetter: true },
+                  { key: "S", label: "Stress Index", desc: "Volume/capacity × speed-drop", higherIsBetter: false },
+                  ...(usedFull ? [
+                    { key: "Q", label: "Equity (Theil-T)", desc: "Inequality across user groups", higherIsBetter: false },
+                    { key: "I", label: "Intermodal Synergy", desc: "Multi-modal connection quality", higherIsBetter: true },
+                  ] : []),
+                ];
+                return (
+                  <>
+                    <div className="section-header">
+                      <h2>Performance Index</h2>
+                      <span className="chip">{usedFull ? "Full Tier-2 · 6 KPI" : "Limited · 4 KPI"}</span>
+                    </div>
+
+                    {/* ── Big score card ── */}
+                    <div className={`eqm-score-card ${perfCls}`}>
+                      <div className="eqm-score-number">{E.toFixed(3)}</div>
+                      <div className="eqm-score-label">{perfLabel}</div>
+                      <div className="eqm-score-sub">
+                        {usedFull
+                          ? "E = (M + R + C + I − S − Q + 2) / 6"
+                          : "E = (M + R + C − S + 1) / 4"}
+                      </div>
+                      <div className="eqm-score-bar">
+                        <div className="eqm-score-fill" style={{ width: `${E * 100}%` }} />
+                      </div>
+                      <div className="eqm-score-scale">
+                        <span>0</span><span>0.30 Poor</span><span>0.45 Mod.</span><span>0.60 Good</span><span>0.75 Exc.</span><span>1</span>
+                      </div>
+                    </div>
+
+                    {/* ── KPI breakdown ── */}
+                    <h3 style={{ marginTop: "1.25rem", marginBottom: "0.65rem", fontSize: "0.9rem" }}>KPI Breakdown</h3>
+                    <div className="eqm-kpi-cards">
+                      {kpiDefs.map(({ key, label, desc, higherIsBetter }) => {
+                        const val = kpisSnapshot[key] ?? 0;
+                        const good = higherIsBetter ? val >= 0.6 : val <= 0.4;
+                        const bad = higherIsBetter ? val < 0.35 : val > 0.65;
+                        return (
+                          <div key={key} className={`eqm-kpi-card ${good ? "kpi-good" : bad ? "kpi-bad" : "kpi-warn"}`}>
+                            <span className="kpi-key">{key}</span>
+                            <strong className="kpi-value">{val.toFixed(3)}</strong>
+                            <span className="kpi-name">{label}</span>
+                            <span className="kpi-desc">{desc}</span>
+                            <div className="kpi-bar">
+                              <div className="kpi-bar-fill" style={{ width: `${val * 100}%` }} />
+                            </div>
+                            <span className="kpi-direction">{higherIsBetter ? "↑ higher is better" : "↓ lower is better"}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* ── Vulnerability ── */}
+                    {E_base !== null && dE !== null ? (
+                      <div className={`eqm-vuln-card ${dE <= -0.05 ? "vuln-antifragile" : dE < 0.10 ? "vuln-resilient" : dE < 0.30 ? "vuln-moderate" : "vuln-major"}`}>
+                        <h3>System Vulnerability ΔE</h3>
+                        <div className="vuln-metrics">
+                          <div><span>E baseline</span><strong>{E_base.toFixed(3)}</strong></div>
+                          <div><span>E post-event</span><strong>{E.toFixed(3)}</strong></div>
+                          <div><span>ΔE</span><strong className="vuln-delta">{dE >= 0 ? "+" : ""}{dE.toFixed(3)}</strong></div>
+                        </div>
+                        <p className="vuln-interpretation">{eqmVulnLabel(dE)}</p>
+                        <code className="vuln-formula">
+                          ΔE = 1 − {E.toFixed(3)} / {E_base.toFixed(3)} = {dE.toFixed(3)}
+                        </code>
+                      </div>
+                    ) : null}
+
+                    {/* ── Formula reference ── */}
+                    <details className="eqm-formula-details">
+                      <summary>Formula Reference (D3.2)</summary>
+                      <div className="eqm-formula-block">
+                        <p><strong>Full Tier-2 Index:</strong></p>
+                        <code>E_Tier2 = (M + R + C + I − S − Q + 2) / 6</code>
+                        <p style={{ marginTop: "0.5rem" }}><strong>Limited 4-KPI Index:</strong></p>
+                        <code>E_limited = (M + R + C − S + 1) / 4</code>
+                        <p style={{ marginTop: "0.5rem" }}><strong>System Vulnerability:</strong></p>
+                        <code>ΔE = 1 − E_post / E_base</code>
+                        <p className="muted" style={{ fontSize: "0.75rem", marginTop: "0.5rem" }}>
+                          All KPIs ∈ [0, 1]. E ∈ [0, 1]. ΔE &lt; 0 = antifragile, ΔE ≈ 0 = resilient, ΔE &gt; 0.3 = major vulnerability.
+                        </p>
+                      </div>
+                    </details>
+
+                    {/* ── Save actions ── */}
+                    <div className="eqm-save-section">
+                      <h3>Save Results</h3>
+                      <div className="button-row">
+                        <button className="secondary-button" disabled title="Sim DB connector not yet implemented — planned for T5.2">
+                          Save to Sim DB
+                        </button>
+                        <button className="secondary-button" disabled title="Ontology DB connector not yet implemented — planned for T4.2">
+                          Save to Ontology DB
+                        </button>
+                      </div>
+                      <p className="muted" style={{ fontSize: "0.78rem" }}>
+                        Database connections are planned for future releases. Results are available in-session only.
+                      </p>
+                    </div>
+                  </>
+                );
+              })()}
+            </article>
           </section>
         ) : null}
 
