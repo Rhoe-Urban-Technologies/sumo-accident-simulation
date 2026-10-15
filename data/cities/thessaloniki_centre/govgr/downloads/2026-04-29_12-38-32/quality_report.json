@@ -1,0 +1,391 @@
+{
+  "started_utc": "2026-04-29T12:38:32.539768+00:00",
+  "args": {
+    "dataset": "all",
+    "source": "realtime",
+    "limit": 500,
+    "offset_start": 0,
+    "max_pages": null,
+    "timeout": 30.0,
+    "retries": 3,
+    "backoff": 1.0,
+    "historical_max_files": null,
+    "historical_pattern": null,
+    "no_extract_historical": false,
+    "output_dir": "data/cities/thessaloniki_centre/govgr/downloads",
+    "dry_run": false,
+    "skip_parquet": false,
+    "log_level": "INFO"
+  },
+  "datasets": {
+    "speed": {
+      "dataset": "speed",
+      "realtime": {
+        "dataset": "speed",
+        "source_url": "https://feed.opendata.imetb.gr/fcd/speed.csv",
+        "rows_raw_merged": 8239,
+        "rows_clean": 8239,
+        "pages_downloaded": 17,
+        "limit": 500,
+        "offset_start": 0,
+        "pages": [
+          {
+            "page": 0,
+            "offset": 0,
+            "url": "https://feed.opendata.imetb.gr/fcd/speed.csv?offset=0&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/speed/page_00000_offset_00000000.csv"
+          },
+          {
+            "page": 1,
+            "offset": 500,
+            "url": "https://feed.opendata.imetb.gr/fcd/speed.csv?offset=500&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/speed/page_00001_offset_00000500.csv"
+          },
+          {
+            "page": 2,
+            "offset": 1000,
+            "url": "https://feed.opendata.imetb.gr/fcd/speed.csv?offset=1000&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/speed/page_00002_offset_00001000.csv"
+          },
+          {
+            "page": 3,
+            "offset": 1500,
+            "url": "https://feed.opendata.imetb.gr/fcd/speed.csv?offset=1500&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/speed/page_00003_offset_00001500.csv"
+          },
+          {
+            "page": 4,
+            "offset": 2000,
+            "url": "https://feed.opendata.imetb.gr/fcd/speed.csv?offset=2000&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/speed/page_00004_offset_00002000.csv"
+          },
+          {
+            "page": 5,
+            "offset": 2500,
+            "url": "https://feed.opendata.imetb.gr/fcd/speed.csv?offset=2500&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/speed/page_00005_offset_00002500.csv"
+          },
+          {
+            "page": 6,
+            "offset": 3000,
+            "url": "https://feed.opendata.imetb.gr/fcd/speed.csv?offset=3000&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/speed/page_00006_offset_00003000.csv"
+          },
+          {
+            "page": 7,
+            "offset": 3500,
+            "url": "https://feed.opendata.imetb.gr/fcd/speed.csv?offset=3500&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/speed/page_00007_offset_00003500.csv"
+          },
+          {
+            "page": 8,
+            "offset": 4000,
+            "url": "https://feed.opendata.imetb.gr/fcd/speed.csv?offset=4000&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/speed/page_00008_offset_00004000.csv"
+          },
+          {
+            "page": 9,
+            "offset": 4500,
+            "url": "https://feed.opendata.imetb.gr/fcd/speed.csv?offset=4500&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/speed/page_00009_offset_00004500.csv"
+          },
+          {
+            "page": 10,
+            "offset": 5000,
+            "url": "https://feed.opendata.imetb.gr/fcd/speed.csv?offset=5000&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/speed/page_00010_offset_00005000.csv"
+          },
+          {
+            "page": 11,
+            "offset": 5500,
+            "url": "https://feed.opendata.imetb.gr/fcd/speed.csv?offset=5500&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/speed/page_00011_offset_00005500.csv"
+          },
+          {
+            "page": 12,
+            "offset": 6000,
+            "url": "https://feed.opendata.imetb.gr/fcd/speed.csv?offset=6000&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/speed/page_00012_offset_00006000.csv"
+          },
+          {
+            "page": 13,
+            "offset": 6500,
+            "url": "https://feed.opendata.imetb.gr/fcd/speed.csv?offset=6500&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/speed/page_00013_offset_00006500.csv"
+          },
+          {
+            "page": 14,
+            "offset": 7000,
+            "url": "https://feed.opendata.imetb.gr/fcd/speed.csv?offset=7000&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/speed/page_00014_offset_00007000.csv"
+          },
+          {
+            "page": 15,
+            "offset": 7500,
+            "url": "https://feed.opendata.imetb.gr/fcd/speed.csv?offset=7500&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/speed/page_00015_offset_00007500.csv"
+          },
+          {
+            "page": 16,
+            "offset": 8000,
+            "url": "https://feed.opendata.imetb.gr/fcd/speed.csv?offset=8000&limit=500",
+            "rows": 239,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/speed/page_00016_offset_00008000.csv"
+          }
+        ],
+        "clean_csv": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/clean/speed.csv",
+        "clean_parquet": null,
+        "baseline_files": [
+          "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/baselines/baseline_speed_by_hour.csv"
+        ],
+        "rows_before_dedup": 8239,
+        "rows_after_dedup": 8239,
+        "dedup_removed": 0,
+        "timestamp_min": "2026-04-28 15:30:00",
+        "timestamp_max": "2026-04-29 15:30:00",
+        "unique_timestamps": 97,
+        "unique_links": 7167,
+        "uniqueentries_eq1_pct": 88.84573370554679,
+        "uniqueentries_lt3_pct": 94.07695108629687,
+        "speed_gt120_count": 36
+      }
+    },
+    "congestion": {
+      "dataset": "congestion",
+      "realtime": {
+        "dataset": "congestion",
+        "source_url": "https://feed.opendata.imetb.gr/fcd/congestions.csv",
+        "rows_raw_merged": 8239,
+        "rows_clean": 8239,
+        "pages_downloaded": 17,
+        "limit": 500,
+        "offset_start": 0,
+        "pages": [
+          {
+            "page": 0,
+            "offset": 0,
+            "url": "https://feed.opendata.imetb.gr/fcd/congestions.csv?offset=0&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/congestion/page_00000_offset_00000000.csv"
+          },
+          {
+            "page": 1,
+            "offset": 500,
+            "url": "https://feed.opendata.imetb.gr/fcd/congestions.csv?offset=500&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/congestion/page_00001_offset_00000500.csv"
+          },
+          {
+            "page": 2,
+            "offset": 1000,
+            "url": "https://feed.opendata.imetb.gr/fcd/congestions.csv?offset=1000&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/congestion/page_00002_offset_00001000.csv"
+          },
+          {
+            "page": 3,
+            "offset": 1500,
+            "url": "https://feed.opendata.imetb.gr/fcd/congestions.csv?offset=1500&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/congestion/page_00003_offset_00001500.csv"
+          },
+          {
+            "page": 4,
+            "offset": 2000,
+            "url": "https://feed.opendata.imetb.gr/fcd/congestions.csv?offset=2000&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/congestion/page_00004_offset_00002000.csv"
+          },
+          {
+            "page": 5,
+            "offset": 2500,
+            "url": "https://feed.opendata.imetb.gr/fcd/congestions.csv?offset=2500&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/congestion/page_00005_offset_00002500.csv"
+          },
+          {
+            "page": 6,
+            "offset": 3000,
+            "url": "https://feed.opendata.imetb.gr/fcd/congestions.csv?offset=3000&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/congestion/page_00006_offset_00003000.csv"
+          },
+          {
+            "page": 7,
+            "offset": 3500,
+            "url": "https://feed.opendata.imetb.gr/fcd/congestions.csv?offset=3500&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/congestion/page_00007_offset_00003500.csv"
+          },
+          {
+            "page": 8,
+            "offset": 4000,
+            "url": "https://feed.opendata.imetb.gr/fcd/congestions.csv?offset=4000&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/congestion/page_00008_offset_00004000.csv"
+          },
+          {
+            "page": 9,
+            "offset": 4500,
+            "url": "https://feed.opendata.imetb.gr/fcd/congestions.csv?offset=4500&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/congestion/page_00009_offset_00004500.csv"
+          },
+          {
+            "page": 10,
+            "offset": 5000,
+            "url": "https://feed.opendata.imetb.gr/fcd/congestions.csv?offset=5000&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/congestion/page_00010_offset_00005000.csv"
+          },
+          {
+            "page": 11,
+            "offset": 5500,
+            "url": "https://feed.opendata.imetb.gr/fcd/congestions.csv?offset=5500&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/congestion/page_00011_offset_00005500.csv"
+          },
+          {
+            "page": 12,
+            "offset": 6000,
+            "url": "https://feed.opendata.imetb.gr/fcd/congestions.csv?offset=6000&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/congestion/page_00012_offset_00006000.csv"
+          },
+          {
+            "page": 13,
+            "offset": 6500,
+            "url": "https://feed.opendata.imetb.gr/fcd/congestions.csv?offset=6500&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/congestion/page_00013_offset_00006500.csv"
+          },
+          {
+            "page": 14,
+            "offset": 7000,
+            "url": "https://feed.opendata.imetb.gr/fcd/congestions.csv?offset=7000&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/congestion/page_00014_offset_00007000.csv"
+          },
+          {
+            "page": 15,
+            "offset": 7500,
+            "url": "https://feed.opendata.imetb.gr/fcd/congestions.csv?offset=7500&limit=500",
+            "rows": 500,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/congestion/page_00015_offset_00007500.csv"
+          },
+          {
+            "page": 16,
+            "offset": 8000,
+            "url": "https://feed.opendata.imetb.gr/fcd/congestions.csv?offset=8000&limit=500",
+            "rows": 239,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/congestion/page_00016_offset_00008000.csv"
+          }
+        ],
+        "clean_csv": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/clean/congestion.csv",
+        "clean_parquet": null,
+        "baseline_files": [
+          "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/baselines/baseline_congestion_share_by_hour.csv"
+        ],
+        "rows_before_dedup": 8239,
+        "rows_after_dedup": 8239,
+        "dedup_removed": 0,
+        "timestamp_min": "2026-04-28 15:30:00",
+        "timestamp_max": "2026-04-29 15:30:00",
+        "unique_timestamps": 97,
+        "unique_links": 7167
+      }
+    },
+    "travel_times": {
+      "dataset": "travel_times",
+      "realtime": {
+        "dataset": "travel_times",
+        "source_url": "https://feed.opendata.imetb.gr/fcd/traveltimes.csv",
+        "rows_raw_merged": 113,
+        "rows_clean": 113,
+        "pages_downloaded": 1,
+        "limit": 500,
+        "offset_start": 0,
+        "pages": [
+          {
+            "page": 0,
+            "offset": 0,
+            "url": "https://feed.opendata.imetb.gr/fcd/traveltimes.csv?offset=0&limit=500",
+            "rows": 113,
+            "raw_file": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/raw/travel_times/page_00000_offset_00000000.csv"
+          }
+        ],
+        "clean_csv": "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/clean/travel_times.csv",
+        "clean_parquet": null,
+        "baseline_files": [
+          "data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/baselines/baseline_travel_time_by_hour.csv"
+        ],
+        "rows_before_dedup": 113,
+        "rows_after_dedup": 113,
+        "dedup_removed": 0,
+        "timestamp_min": "2026-04-29 15:30:00",
+        "timestamp_max": "2026-04-29 15:30:00",
+        "unique_timestamps": 1,
+        "unique_paths": 113
+      }
+    }
+  },
+  "dataset_configs": {
+    "speed": {
+      "name": "speed",
+      "realtime_url": "https://feed.opendata.imetb.gr/fcd/speed.csv",
+      "historical_ftp": "ftp://62.217.125.152:2121/fcd_speed/",
+      "timestamp_col": "Timestamp",
+      "key_columns": [
+        "Link_id",
+        "Link_Direction",
+        "Timestamp"
+      ],
+      "numeric_columns": [
+        "Speed",
+        "UniqueEntries"
+      ]
+    },
+    "congestion": {
+      "name": "congestion",
+      "realtime_url": "https://feed.opendata.imetb.gr/fcd/congestions.csv",
+      "historical_ftp": null,
+      "timestamp_col": "Timestamp",
+      "key_columns": [
+        "Link_id",
+        "Link_Direction",
+        "Timestamp"
+      ],
+      "numeric_columns": []
+    },
+    "travel_times": {
+      "name": "travel_times",
+      "realtime_url": "https://feed.opendata.imetb.gr/fcd/traveltimes.csv",
+      "historical_ftp": "ftp://62.217.125.152:2121/fcd_traveltimes/",
+      "timestamp_col": "Timestamp",
+      "key_columns": [
+        "Path_id",
+        "Timestamp"
+      ],
+      "numeric_columns": [
+        "Duration"
+      ]
+    }
+  },
+  "finished_utc": "2026-04-29T12:38:45.856958+00:00"
+}

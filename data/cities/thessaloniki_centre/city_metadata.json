@@ -1,0 +1,7 @@
+{
+  "slug": "thessaloniki_centre",
+  "display_name": "Thessaloniki Centre",
+  "osm_extract": "data/cities/thessaloniki_centre/network/thessaloniki_centre.osm",
+  "config_path": "configs/thessaloniki_centre/default.yaml",
+  "created_at_utc": "2026-04-29T12:35:13.876088+00:00"
+}

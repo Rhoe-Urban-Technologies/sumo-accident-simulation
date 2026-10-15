@@ -1,0 +1,46 @@
+{
+  "calibration_year": 2025,
+  "validation_year": 2026,
+  "outputs": {
+    "calibration": {
+      "speed_meta": {
+        "files": 0,
+        "rows_read": 0,
+        "link_hour_rows": 0
+      },
+      "travel_time_meta": {
+        "files": 0,
+        "rows_read": 0,
+        "path_hour_rows": 0
+      },
+      "files": [
+        "data/cities/thessaloniki_centre/govgr/targets/calibration_2025_validation_2026/calibration_speed_network_hourly.csv",
+        "data/cities/thessaloniki_centre/govgr/targets/calibration_2025_validation_2026/calibration_speed_network_weekpart_hourly.csv",
+        "data/cities/thessaloniki_centre/govgr/targets/calibration_2025_validation_2026/calibration_speed_link_direction_hourly_mean.csv",
+        "data/cities/thessaloniki_centre/govgr/targets/calibration_2025_validation_2026/calibration_travel_time_network_hourly.csv",
+        "data/cities/thessaloniki_centre/govgr/targets/calibration_2025_validation_2026/calibration_travel_time_network_weekpart_hourly.csv",
+        "data/cities/thessaloniki_centre/govgr/targets/calibration_2025_validation_2026/calibration_travel_time_path_hourly_mean.csv"
+      ]
+    },
+    "validation": {
+      "speed_meta": {
+        "files": 0,
+        "rows_read": 0,
+        "link_hour_rows": 0
+      },
+      "travel_time_meta": {
+        "files": 0,
+        "rows_read": 0,
+        "path_hour_rows": 0
+      },
+      "files": [
+        "data/cities/thessaloniki_centre/govgr/targets/calibration_2025_validation_2026/validation_speed_network_hourly.csv",
+        "data/cities/thessaloniki_centre/govgr/targets/calibration_2025_validation_2026/validation_speed_network_weekpart_hourly.csv",
+        "data/cities/thessaloniki_centre/govgr/targets/calibration_2025_validation_2026/validation_speed_link_direction_hourly_mean.csv",
+        "data/cities/thessaloniki_centre/govgr/targets/calibration_2025_validation_2026/validation_travel_time_network_hourly.csv",
+        "data/cities/thessaloniki_centre/govgr/targets/calibration_2025_validation_2026/validation_travel_time_network_weekpart_hourly.csv",
+        "data/cities/thessaloniki_centre/govgr/targets/calibration_2025_validation_2026/validation_travel_time_path_hourly_mean.csv"
+      ]
+    }
+  }
+}

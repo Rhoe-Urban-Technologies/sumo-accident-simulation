@@ -1,0 +1,2 @@
+hour,rows,mean_duration_s,median_duration_s,p10_duration_s,p90_duration_s
+15,113,287.3185840707965,246.0,109.0,545.8

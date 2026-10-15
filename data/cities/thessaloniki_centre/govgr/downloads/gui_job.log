@@ -1,0 +1,51 @@
+2026-04-29 15:38:32,540 [INFO    ] sas.govgr_downloader — [speed][realtime] page=0 offset=0
+2026-04-29 15:38:32,978 [INFO    ] sas.govgr_downloader — [speed][realtime] page=1 offset=500
+2026-04-29 15:38:33,354 [INFO    ] sas.govgr_downloader — [speed][realtime] page=2 offset=1000
+2026-04-29 15:38:33,712 [INFO    ] sas.govgr_downloader — [speed][realtime] page=3 offset=1500
+2026-04-29 15:38:34,065 [INFO    ] sas.govgr_downloader — [speed][realtime] page=4 offset=2000
+2026-04-29 15:38:34,405 [INFO    ] sas.govgr_downloader — [speed][realtime] page=5 offset=2500
+2026-04-29 15:38:34,750 [INFO    ] sas.govgr_downloader — [speed][realtime] page=6 offset=3000
+2026-04-29 15:38:35,127 [INFO    ] sas.govgr_downloader — [speed][realtime] page=7 offset=3500
+2026-04-29 15:38:35,490 [INFO    ] sas.govgr_downloader — [speed][realtime] page=8 offset=4000
+2026-04-29 15:38:35,857 [INFO    ] sas.govgr_downloader — [speed][realtime] page=9 offset=4500
+2026-04-29 15:38:36,223 [INFO    ] sas.govgr_downloader — [speed][realtime] page=10 offset=5000
+2026-04-29 15:38:36,563 [INFO    ] sas.govgr_downloader — [speed][realtime] page=11 offset=5500
+2026-04-29 15:38:36,906 [INFO    ] sas.govgr_downloader — [speed][realtime] page=12 offset=6000
+2026-04-29 15:38:37,261 [INFO    ] sas.govgr_downloader — [speed][realtime] page=13 offset=6500
+2026-04-29 15:38:37,688 [INFO    ] sas.govgr_downloader — [speed][realtime] page=14 offset=7000
+2026-04-29 15:38:38,039 [INFO    ] sas.govgr_downloader — [speed][realtime] page=15 offset=7500
+2026-04-29 15:38:38,381 [INFO    ] sas.govgr_downloader — [speed][realtime] page=16 offset=8000
+2026-04-29 15:38:38,861 [WARNING ] sas.govgr_downloader — [speed] parquet export skipped: Unable to find a usable engine; tried using: 'pyarrow', 'fastparquet'.
+A suitable version of pyarrow or fastparquet is required for parquet support.
+Trying to import the above resulted in these errors:
+ - Missing optional dependency 'pyarrow'. pyarrow is required for parquet support. Use pip or conda to install pyarrow.
+ - Missing optional dependency 'fastparquet'. fastparquet is required for parquet support. Use pip or conda to install fastparquet.
+2026-04-29 15:38:38,874 [INFO    ] sas.govgr_downloader — [congestion][realtime] page=0 offset=0
+2026-04-29 15:38:39,268 [INFO    ] sas.govgr_downloader — [congestion][realtime] page=1 offset=500
+2026-04-29 15:38:39,670 [INFO    ] sas.govgr_downloader — [congestion][realtime] page=2 offset=1000
+2026-04-29 15:38:40,061 [INFO    ] sas.govgr_downloader — [congestion][realtime] page=3 offset=1500
+2026-04-29 15:38:40,452 [INFO    ] sas.govgr_downloader — [congestion][realtime] page=4 offset=2000
+2026-04-29 15:38:40,842 [INFO    ] sas.govgr_downloader — [congestion][realtime] page=5 offset=2500
+2026-04-29 15:38:41,237 [INFO    ] sas.govgr_downloader — [congestion][realtime] page=6 offset=3000
+2026-04-29 15:38:41,633 [INFO    ] sas.govgr_downloader — [congestion][realtime] page=7 offset=3500
+2026-04-29 15:38:42,010 [INFO    ] sas.govgr_downloader — [congestion][realtime] page=8 offset=4000
+2026-04-29 15:38:42,400 [INFO    ] sas.govgr_downloader — [congestion][realtime] page=9 offset=4500
+2026-04-29 15:38:42,810 [INFO    ] sas.govgr_downloader — [congestion][realtime] page=10 offset=5000
+2026-04-29 15:38:43,173 [INFO    ] sas.govgr_downloader — [congestion][realtime] page=11 offset=5500
+2026-04-29 15:38:43,624 [INFO    ] sas.govgr_downloader — [congestion][realtime] page=12 offset=6000
+2026-04-29 15:38:44,037 [INFO    ] sas.govgr_downloader — [congestion][realtime] page=13 offset=6500
+2026-04-29 15:38:44,423 [INFO    ] sas.govgr_downloader — [congestion][realtime] page=14 offset=7000
+2026-04-29 15:38:44,802 [INFO    ] sas.govgr_downloader — [congestion][realtime] page=15 offset=7500
+2026-04-29 15:38:45,222 [INFO    ] sas.govgr_downloader — [congestion][realtime] page=16 offset=8000
+2026-04-29 15:38:45,798 [WARNING ] sas.govgr_downloader — [congestion] parquet export skipped: Unable to find a usable engine; tried using: 'pyarrow', 'fastparquet'.
+A suitable version of pyarrow or fastparquet is required for parquet support.
+Trying to import the above resulted in these errors:
+ - Missing optional dependency 'pyarrow'. pyarrow is required for parquet support. Use pip or conda to install pyarrow.
+ - Missing optional dependency 'fastparquet'. fastparquet is required for parquet support. Use pip or conda to install fastparquet.
+2026-04-29 15:38:45,817 [INFO    ] sas.govgr_downloader — [travel_times][realtime] page=0 offset=0
+2026-04-29 15:38:45,854 [WARNING ] sas.govgr_downloader — [travel_times] parquet export skipped: Unable to find a usable engine; tried using: 'pyarrow', 'fastparquet'.
+A suitable version of pyarrow or fastparquet is required for parquet support.
+Trying to import the above resulted in these errors:
+ - Missing optional dependency 'pyarrow'. pyarrow is required for parquet support. Use pip or conda to install pyarrow.
+ - Missing optional dependency 'fastparquet'. fastparquet is required for parquet support. Use pip or conda to install fastparquet.
+2026-04-29 15:38:45,857 [INFO    ] sas.govgr_downloader — Quality report → data/cities/thessaloniki_centre/govgr/downloads/2026-04-29_12-38-32/quality_report.json
